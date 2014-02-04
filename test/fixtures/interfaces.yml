@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  computer_id: 
+  name: MyString
+  rx: 1
+  tx: 1
+
+two:
+  computer_id: 
+  name: MyString
+  rx: 1
+  tx: 1

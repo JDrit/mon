@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  computer_id: 
+  load_average: 9.99
+  memory_usage: 9.99
+  network_up: 9.99
+  network_down: 9.99
+
+two:
+  computer_id: 
+  load_average: 9.99
+  memory_usage: 9.99
+  network_up: 9.99
+  network_down: 9.99

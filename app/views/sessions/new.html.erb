@@ -1,0 +1,18 @@
+<% provide(:title, "Sign in") %>
+<br>
+<br>
+<div id="signin_jumbo" class="jumbotron">
+    <div id="signin_cont" class="container">
+        <h1>Sign in</h1>
+        <%= form_for(:session, url: sessions_path) do |f| %>
+            <%= f.label :email %>
+            <%= f.text_field :email, class: "form-control", placeholder: "email" %>
+
+            <%= f.label :password %>
+            <%= f.password_field :password, class: "form-control", placeholder: "password" %>
+            <br />
+            <%= f.submit "Sign in", class: "btn btn-large btn-primary" %>
+
+        <% end %>
+    </div>
+</div>
