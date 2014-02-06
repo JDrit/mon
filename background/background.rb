@@ -13,8 +13,8 @@ def get_load_average
 end
 
 def get_memory_usage
-    memory_usage = (File.read("/proc/meminfo").split /\r?\n/).map do |line| 
-        (line.split /\s+/)[1].to_i
+    memory_usage = (File.read("/proc/meminfo").split(/\r?\n/)).map do |line| 
+        (line.split(/\s+/))[1].to_i
     end
     return memory_usage[0] - memory_usage[1] - memory_usage[2] - memory_usage[3]
 end
@@ -44,35 +44,69 @@ def get_processes
     return processes
 end
 
-def get_disk_stats
-    stdin, stdout, stderr = Open3.popen3("iostat")
-    partitions = []
-    stdout.readlines[6..-2].each do |line|
-        line_split = line.split(/\s+/)
-        partitions << {name: line_split[0], read: line_split[2], write: line_split[3]}
+def ticks
+    File.open("/proc/uptime", "r").each_line do |line|
+        return line.split(" ")[0].to_f
     end
-    return partitions
+end
+
+def get_disks_sector_info
+    data = Hash.new
+    file = File.open("/proc/diskstats", "r")
+    file.each_line do |line|
+        next if line.length < 13
+        line_split = line.split(" ")
+        next if line_split[5] == "0" && line_split[9] == "0"
+        name = line_split[2]
+        data[name] = [line_split[5].to_i, line_split[9].to_i] 
+    end
+    return data, ticks()
+end
+
+def get_disk_stats
+    b_sectors, b_time = get_disks_sector_info
+    sleep(1)
+    e_sectors, e_time = get_disks_sector_info
+    return e_sectors.keys.map { |key| 
+        {name: "/dev/" + key, 
+         read: ((e_sectors[key][0] - b_sectors[key][0]) * 512 / (e_time - b_time)).to_i,
+         write: ((e_sectors[key][1] - b_sectors[key][1]) * 512 / (e_time - b_time)).to_i } }
 end
 
 def get_interfaces_stats
-    stdin, stdout, stderr = Open3.popen3("sar -n DEV 1 1")
-    interfaces = []
-    output= stdout.readlines
-    output[output.length - ((output.length - 5) / 2)..-1].each do |line|
-        line_split = line.split(/\s+/)
-        interfaces << {name: line_split[1], rx: line_split[4].to_i * 8, 
-                       tx: line_split[5].to_i * 8}
+    b_info, b_time = get_interfaces_info
+    sleep(1)
+    e_info, e_time = get_interfaces_info
+    return e_info.keys.map { |key|
+        {name: key,
+        rx: ((e_info[key][0] - b_info[key][0]) / (e_time - b_time)).to_i, 
+        tx: ((e_info[key][1] - b_info[key][1]) / (e_time - b_time)).to_i } }
+end
+
+def get_interfaces_info
+    data = Hash.new
+    file = File.open("/proc/net/dev")
+    count = 0
+    file.each_line do |line|
+        count += 1
+        next if count <= 2
+        line_split = line.split(" ")
+        name = line_split[0]
+        data[name] = [line_split[1].to_i, line_split[9].to_i]
     end
-    return interfaces
+    return data, ticks()
 end
 
 def background_thread api_key, interval
     while true
         uri = URI.parse("http://localhost:3000/api/add_entry")
-        data = { "api_key" => api_key, "load_average" => get_load_average, 
-                "memory_usage" => get_memory_usage, "disks" => get_disk_stats, 
-                "programs" => get_processes, "partitions" => get_partition_stats,
-                "interfaces" => get_interfaces_stats }
+        data = { "api_key" => api_key, 
+                 "load_average" => get_load_average, 
+                 "memory_usage" => get_memory_usage, 
+                 "disks" => get_disk_stats, 
+                 "programs" => get_processes, 
+                 "partitions" => get_partition_stats,
+                 "interfaces" => get_interfaces_stats }
         headers = { "Content-Type" => "application/json" }
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Post.new(uri.request_uri, headers)

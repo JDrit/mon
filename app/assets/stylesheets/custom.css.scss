@@ -5,7 +5,18 @@ body {
 }
 
 .container {
-    width: 1400px;
+    //width: 1400px;
+    min-height: 300px;
     text-align: center;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    margin-bottom: 50px;
 }
 
+@media (min-width: 1600px) {
+    .container {
+        width: 1400px;
+    }
+}

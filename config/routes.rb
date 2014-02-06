@@ -13,7 +13,7 @@ Mon::Application.routes.draw do
     match '/load_data/interfaces_tx/:id', to: 'computers#get_interfaces_tx', via: 'get'
     
 
-    root 'sessions#new'
+    root 'computers#index'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

@@ -1,3 +1,5 @@
+<% provide(:title, @current_computer.name) %>
+<% provide(:computer, @current_computer.name) %>
 <div id="wrapper">
 	<div id="columns">
 		<div class="pin">
@@ -20,373 +22,256 @@
         </div>
 	</div>
 </div>
-
 <script>
-$(function() {
-    $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
-        // create the chart
-        $('#stats').highcharts('StockChart', {
-            rangeSelector: {
-                buttons: [{
-                    type: 'minute',
-                    count: 15,
-                    text: '15m'
-                }, {
-                    type: 'hour',
-                    count: 1,
-                    text: '1h',
-                }, {
-                    type: 'hour',
-                    count: 12,
-                    text: '12h'
-                }, {
-                    type: 'day',
-                    count: 1,
-                    text: '1d'
-                }, {
-                    type: 'week',
-                    count: 1,
-                    text: '1w'
-                }, {
-                    type: 'month', 
-                    count: 1,
-                    text: '1M'
-                }, {
-                    type: 'all',
-                    text: 'ALL'
-                }],
-                selected: 1
-            },
+var buttons =  [{
+                type: 'minute',
+                count: 15,
+                text: '15m'
+            }, {
+                type: 'hour',
+                count: 1,
+                text: '1h',
+            }, {
+                type: 'hour',
+                count: 12,
+                text: '12h'
+            }, {
+                type: 'day',
+                count: 1,
+                text: '1d'
+            }, {
+                type: 'week',
+                count: 1,
+                text: '1w'
+            }, {
+                type: 'month', 
+                count: 1,
+                text: '1M'
+            }, {
+                type: 'all',
+                text: 'ALL'
+            }]; 
 
+function disk_io_formatter() {
+    var s = "";
+    $.each(this.points, function(i, point) { 
+        var y_format = "";
+        if (this.y < 1024) {
+            y_format = this.y + "B/s";
+        } else if (this.y < 1024 * 1024) {
+            y_format = (this.y / 1024.0).toFixed(2) + "KB/s";
+        } else if (this.y < 1024 * 1024 * 1024) {
+            y_format = (this.y / 1024.0 / 1024.0).toFixed(2) + "MB/s";
+        } else {
+            y_format = (this.y / 1024.0 / 1024.0 / 1024.0).toFixed(2) + "GB/s"
+        }
+        s += '<span style="color:' + point.series.color + '">' + point.series.name + '</span>: <b>' + y_format + '</b><br/>';
+    });
+    return s;
+}
+
+function net_io_formatter() {
+    var s = "";
+    $.each(this.points, function(i, point) { 
+        var y_format = "";
+        if (this.y < 1024) {
+            y_format = this.y + "b/s";
+        } else if (this.y < 1024 * 1024) {
+            y_format = (this.y / 1024.0).toFixed(2) + "Kb/s";
+        } else if (this.y < 1024 * 1024 * 1024) {
+            y_format = (this.y / 1024.0 / 1024.0).toFixed(2) + "Mb/s";
+        } else {
+            y_format = (this.y / 1024.0 / 1024.0 / 1024.0).toFixed(2) + "Gb/s"
+        }
+        s += '<span style="color:' + point.series.color + '">' + point.series.name + '</span>: <b>' + y_format + '</b><br/>';
+    });
+    return s;
+}
+
+
+$.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
+    // create the chart
+    $('#stats').highcharts('StockChart', {
+        rangeSelector: {
+            buttons: buttons,
+            selected: 1
+        },
+        title: {
+            text: 'Computer Usage'
+        },
+        yAxis: [{
             title: {
-                text: 'Computer Usage'
+                text: 'Load Average'
             },
-
-            yAxis: [{
-                title: {
-                    text: 'Load Average'
-                },
-                height: 200,
-                lineWidth: 2
-            }, {
-                title: {
-                    text: 'Memory Usage'
-                },
-                top: 300,
-                height: 100,
-                offset: 0,
-                lineWidth: 2
-            }],
-            series: [{
-                type: 'areaspline',
-                name: 'Load Average',
-                data: data['cpu'],
-                gapSize: 5,
-                tooltip: {
-                    valueDecimals: 2,
-                }    
-            }, {
-                type: 'areaspline',
-                name: 'Memory Usage',
-                data: data['mem'],
-                yAxis: 1,
-                gapSize: 5,
-                tooltip: {
-                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} MB</b><br/>',
-                    valueDecimals: 0
-                }
-               
-            }]
-        });
+            height: 200,
+            lineWidth: 2
+        }, {
+            title: {
+                text: 'Memory Usage'
+            },
+            top: 300,
+            height: 100,
+            offset: 0,
+            lineWidth: 2
+        }],
+        series: [{
+            type: 'areaspline',
+            name: 'Load Average',
+            data: data['cpu'],
+            gapSize: 5,
+            tooltip: {
+                valueDecimals: 2,
+            }    
+        }, {
+            type: 'areaspline',
+            name: 'Memory Usage',
+            data: data['mem'],
+            yAxis: 1,
+            gapSize: 5,
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} MB</b><br/>',
+                valueDecimals: 0
+            }
+           
+        }]
     });
 });
-</script>
-<script>
-    $(function() {
-        $.getJSON('/load_data/partitions/<%= @current_computer.id %>', function(data) {
-            var series = [];
-            Object.keys(data).forEach(function(key) {
-                series.push({name: key, 
-                    data: data[key],
-                    gapSize: 5,
-                    tooltip: {
-                        pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} GB</b><br/>',
-                        valueDecimals: 2
-                    }
-                });
-            });
-            $('#paritions').highcharts('StockChart', {
-                title: {
-                    text: "Partitions"
-                },        
-                rangeSelector: {
-                    buttons: [{
-                        type: 'minute',
-                        count: 15,
-                        text: '15m'
-                    }, {
-                        type: 'hour',
-                        count: 1,
-                        text: '1h'
-                    }, {
-                        type: 'hour',
-                        count: 12,
-                        text: '12h',
-                    }, {
-                        type: 'day',
-                        count: 1,
-                        text: '1d'
-                    }, {
-                        type: 'week',
-                        count: 1,
-                        text: '1w'
-                    }, {
-                        type: 'month', 
-                        count: 1,
-                        text: '1M'
-                    }, {
-                        type: 'all',
-                        text: 'ALL'
-                    }],
-                    selected: 1
-                },
-                yAxis: {
-                    type: 'logarithmic',
-                    minotTickInterval: 0.1
-                },
-                series: series
-            });     
+$.getJSON('/load_data/partitions/<%= @current_computer.id %>', function(data) {
+    var series = [];
+    Object.keys(data).forEach(function(key) {
+        series.push({name: key, 
+            data: data[key],
+            gapSize: 5,
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} GB</b><br/>',
+                valueDecimals: 2
+            }
         });
     });
-</script>
-<script>
-    $(function() {
-        $.getJSON('/load_data/disk_reads/<%= @current_computer.id %>', function(data) {
-            var series = [];
-            Object.keys(data).forEach(function(key) {
-                series.push({name: key, 
-                    data: data[key],
-                    gapSize: 5,
-                    tooltip: {
-                        pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} KB/s</b><br/>',
-                        valueDecimals: 2
-                    }
-                });
-            });
+    $('#paritions').highcharts('StockChart', {
+        title: {
+            text: "Partitions"
+        },        
+        rangeSelector: {
+            buttons: buttons,
+            selected: 1
+        },
+        yAxis: {
+            type: 'logarithmic',
+            minotTickInterval: 0.1
+        },
+        series: series
+    });     
+});
+$.getJSON('/load_data/disk_reads/<%= @current_computer.id %>', function(data) {
+    var series = [];
+    Object.keys(data).forEach(function(key) {
+        series.push({name: key, 
+            data: data[key],
+            gapSize: 5
+        });
+    });
 
-            $('#disk_reads').highcharts('StockChart', {
-                title: {
-                    text: "Disk Reads"
-                },       
-                yAxis: {
-                    min: 1
-                },
-                rangeSelector: {
-                    buttons: [{
-                        type: 'minute',
-                        count: 15,
-                        text: '15m'
-                    }, {
-                        type: 'hour',
-                        count: 1,
-                        text: '1h'
-                    }, {
-                        type: 'hour',
-                        count: 12,
-                        text: '12h',
-                    }, {
-                        type: 'day',
-                        count: 1,
-                        text: '1d'
-                    }, {
-                        type: 'week',
-                        count: 1,
-                        text: '1w'
-                    }, {
-                        type: 'month', 
-                        count: 1,
-                        text: '1M'
-                    }, {
-                        type: 'all',
-                        text: 'ALL'
-                    }],
-                    selected: 1
-                },
-                series: series
-            });     
+    $('#disk_reads').highcharts('StockChart', {
+        title: {
+            text: "Disk Reads"
+        },       
+        yAxis: {
+            min: 0
+        },
+        tooltip: {
+            formatter: disk_io_formatter
+        },
+        rangeSelector: {
+            buttons: buttons,
+            selected: 1
+        },
+        series: series
+    });     
+});
+$.getJSON('/load_data/disk_writes/<%= @current_computer.id %>', function(data) {
+    var series = [];
+    Object.keys(data).forEach(function(key) {
+        series.push({name: key, 
+            data: data[key],
+            gapSize: 5
         });
     });
-</script>
-<script>
-    $(function() {
-        $.getJSON('/load_data/disk_writes/<%= @current_computer.id %>', function(data) {
-            var series = [];
-            Object.keys(data).forEach(function(key) {
-                series.push({name: key, 
-                    data: data[key],
-                    gapSize: 5,
-                    tooltip: {
-                        pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} KB/s</b><br/>',
-                        valueDecimals: 2
-                    }
-                });
-            });
 
-            $('#disk_writes').highcharts('StockChart', {
-                title: {
-                    text: "Disk Writes"
-                },       
-                yAxis: {
-                    min: 0
-                },
-                rangeSelector: {
-                    buttons: [{
-                        type: 'minute',
-                        count: 15,
-                        text: '15m'
-                    }, {
-                        type: 'hour',
-                        count: 1,
-                        text: '1h'
-                    }, {
-                        type: 'hour',
-                        count: 12,
-                        text: '12h',
-                    }, {
-                        type: 'day',
-                        count: 1,
-                        text: '1d'
-                    }, {
-                        type: 'week',
-                        count: 1,
-                        text: '1w'
-                    }, {
-                        type: 'month', 
-                        count: 1,
-                        text: '1M'
-                    }, {
-                        type: 'all',
-                        text: 'ALL'
-                    }],
-                    selected: 1
-                },
-                series: series
-            });
+    $('#disk_writes').highcharts('StockChart', {
+        title: {
+            text: "Disk Writes"
+        },       
+        yAxis: {
+            min: 0
+        },
+        tooltip: {
+            formatter: disk_io_formatter
+        },
+        rangeSelector: {
+            buttons: buttons,
+            selected: 1
+        },
+        series: series
+    });
+});
+$.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>', function(data) {
+    var series = [];
+    Object.keys(data).forEach(function(key) {
+        series.push({name: key, 
+            data: data[key],
+            gapSize: 5,
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} kb/s</b><br/>',
+                valueDecimals: 0
+            }
         });
     });
-</script>
-<script>
-    $(function() {
-        $.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>', function(data) {
-            var series = [];
-            Object.keys(data).forEach(function(key) {
-                series.push({name: key, 
-                    data: data[key],
-                    gapSize: 5,
-                    tooltip: {
-                        pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} kb/s</b><br/>',
-                        valueDecimals: 2
-                    }
-                });
-            });
 
-            $('#interface_rx').highcharts('StockChart', {
-                title: {
-                    text: "Interfaces Incoming"
-                },       
-                yAxis: {
-                    min: 0
-                },
-                rangeSelector: {
-                    buttons: [{
-                        type: 'minute',
-                        count: 15,
-                        text: '15m'
-                    }, {
-                        type: 'hour',
-                        count: 1,
-                        text: '1h'
-                    }, {
-                        type: 'hour',
-                        count: 12,
-                        text: '12h',
-                    }, {
-                        type: 'day',
-                        count: 1,
-                        text: '1d'
-                    }, {
-                        type: 'week',
-                        count: 1,
-                        text: '1w'
-                    }, {
-                        type: 'month', 
-                        count: 1,
-                        text: '1M'
-                    }, {
-                        type: 'all',
-                        text: 'ALL'
-                    }],
-                    selected: 1
-                },
-                series: series
-            });     
+    $('#interface_rx').highcharts('StockChart', {
+        title: {
+            text: "Interfaces Incoming"
+        },       
+        yAxis: {
+            min: 0
+        },
+        tooltip: {
+            formatter: net_io_formatter
+        },
+        rangeSelector: {
+            buttons: buttons,
+            selected: 1
+        },
+        series: series
+    });     
+});
+$.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>', function(data) {
+    var series = [];
+    Object.keys(data).forEach(function(key) {
+        series.push({name: key, 
+            data: data[key],
+            gapSize: 5,
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} Kb/s</b><br/>',
+                valueDecimals: 0
+            }
         });
     });
-</script>
-<script>
-    $(function() {
-        $.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>', function(data) {
-            var series = [];
-            Object.keys(data).forEach(function(key) {
-                series.push({name: key, 
-                    data: data[key],
-                    gapSize: 5,
-                    tooltip: {
-                        pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} Kb/s</b><br/>',
-                        valueDecimals: 2
-                    }
-                });
-            });
-            $('#interface_tx').highcharts('StockChart', {
-                title: {
-                    text: "Interfaces Outgoing"
-                },       
-                yAxis: {
-                    min: 0
-                },
-                rangeSelector: {
-                    buttons: [{
-                        type: 'minute',
-                        count: 15,
-                        text: '15m'
-                    }, {
-                        type: 'hour',
-                        count: 1,
-                        text: '1h'
-                    }, {
-                        type: 'hour',
-                        count: 12,
-                        text: '12h',
-                    }, {
-                        type: 'day',
-                        count: 1,
-                        text: '1d'
-                    }, {
-                        type: 'week',
-                        count: 1,
-                        text: '1w'
-                    }, {
-                        type: 'month', 
-                        count: 1,
-                        text: '1M'
-                    }, {
-                        type: 'all',
-                        text: 'ALL'
-                    }],
-                    selected: 1
-                },
-                series: series
-            });     
-        });
-    });
+    $('#interface_tx').highcharts('StockChart', {
+        title: {
+            text: "Interfaces Outgoing"
+        },       
+        yAxis: {
+            min: 0
+        },
+        tooltip: {
+            formatter: net_io_formatter
+        },
+        rangeSelector: {
+            buttons: buttons,
+            selected: 1
+        },
+        series: series
+    });     
+});
 </script>

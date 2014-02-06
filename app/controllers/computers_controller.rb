@@ -6,6 +6,21 @@ class ComputersController < ApplicationController
         @computers = Computer.all
     end
 
+    def index
+        @computers = Computer.all
+        @computers.each do |computer|
+            stat = computer.stats.last 
+            computer.load_avg = stat.load_average
+            computer.mem_usage = stat.memory_usage
+            computer.disk_cap = computer.partitions.sum(:cap, :conditions => 
+                                                        { :created_at => stat.created_at  })
+            computer.disk_usage = computer.partitions.sum(:usage, :conditions => 
+                                                          { :created_at => stat.created_at })
+        end
+    end
+
+
+    # Below are all the json calls for gettings the stats for a given computer
     def get_stats
         cpu = []
         mem = []
@@ -40,7 +55,7 @@ class ComputersController < ApplicationController
         disk_writes = Hash.new
         @current_computer.disks.select("created_at, name, read, write").each do |disk|
             disk_writes[disk.name] = [] if disk_writes[disk.name] == nil
-            disk_writes[disk.name] << [disk.created_at.to_i * 1000, disk.read.to_i]
+            disk_writes[disk.name] << [disk.created_at.to_i * 1000, disk.write.to_i]
         end
         render :json => disk_writes
     end
@@ -68,5 +83,6 @@ class ComputersController < ApplicationController
             @id = params['id']
             @current_computer = Computer.find_by_id(@id)
         end
+
     
 end

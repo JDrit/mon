@@ -1,0 +1,27 @@
+<% provide(:title, "Computers") %>
+<h1>Monitored Computers</h1>
+<br />
+<% @computers.each do |computer| %>
+    <div class="well">
+        <div class="row">
+            <div class="col-md-4">
+                <%= link_to computer do %>
+                    <h3 style="text-align: left">
+                    <span class="glyphicon glyphicon-stats"></span> 
+                    Name: <strong><%= computer.name %></strong></h3>
+                <% end %>
+            </div>
+            <div class="col-md-4">
+                <h4>Load Average: <%= computer.load_avg %></h4>
+            </div>
+            <div class="col-md-4">
+                <h4>Memory Usage: <%= display_memory computer.mem_usage %></h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-mg-4 col-md-offset-8">
+                <h4>Disk Usage: <%= display_disk computer.disk_usage %> / <%= display_disk computer.disk_cap %></h4>
+            </div>
+        </div>
+    </div>
+<% end %>
