@@ -98,22 +98,42 @@ def get_interfaces_info
 end
 
 def background_thread api_key, interval
+    uri = URI.parse("http://localhost:32400/api/add_entry")
     while true
-        uri = URI.parse("http://localhost:3000/api/add_entry")
-        data = { "api_key" => api_key, 
-                 "load_average" => get_load_average, 
-                 "memory_usage" => get_memory_usage, 
-                 "disks" => get_disk_stats, 
-                 "programs" => get_processes, 
-                 "partitions" => get_partition_stats,
-                 "interfaces" => get_interfaces_stats }
-        headers = { "Content-Type" => "application/json" }
-        http = Net::HTTP.new(uri.host, uri.port)
-        request = Net::HTTP::Post.new(uri.request_uri, headers)
-        request.body = data.to_json
-        response = http.request request
-        puts response.body
-        sleep interval
+        begin
+            b_i_info, b_i_time = get_interfaces_info
+            b_d_sectors, b_d_time = get_disks_sector_info
+            sleep(5)
+            e_i_info, e_i_time = get_interfaces_info
+            e_d_sectors, e_d_time = get_disks_sector_info
+
+            interface_data = e_i_info.keys.map { |key|
+                {name: key,
+                 rx: ((e_i_info[key][0] - b_i_info[key][0]) / (e_i_time - b_i_time)).to_i, 
+                 tx: ((e_i_info[key][1] - b_i_info[key][1]) / (e_i_time - b_i_time)).to_i } }
+            disk_data = e_d_sectors.keys.map { |key| 
+                {name: "/dev/" + key, 
+                 read: ((e_d_sectors[key][0] - b_d_sectors[key][0]) * 512 / (e_d_time - b_d_time)).to_i,
+                 write: ((e_d_sectors[key][1] - b_d_sectors[key][1]) * 512 / (e_d_time - b_d_time)).to_i } }
+
+
+            data = { "api_key" => api_key, 
+                     "load_average" => get_load_average, 
+                     "memory_usage" => get_memory_usage, 
+                     "disks" => disk_data, 
+                     "programs" => get_processes, 
+                     "partitions" => get_partition_stats,
+                     "interfaces" => interface_data }
+            headers = { "Content-Type" => "application/json" }
+            http = Net::HTTP.new(uri.host, uri.port)
+            request = Net::HTTP::Post.new(uri.request_uri, headers)
+            request.body = data.to_json
+            response = http.request request
+            puts response.body
+            sleep interval
+        rescue
+            puts "error"
+        end
     end
 end
 
