@@ -1,27 +1,43 @@
 <% provide(:title, @current_computer.name) %>
 <% provide(:computer, @current_computer.name) %>
-<div id="wrapper">
-	<div id="columns">
-		<div class="pin">
-            <div id="stats" style="width: 600px; height: 500px;"></div>
-        </div>
-		<div class="pin">
-            <div id="paritions" style="width: 600px; height: 500px;"></div>
-        </div>
-		<div class="pin">
-            <div id="disk_reads" style="width: 600px; height: 500px;"></div>
-        </div>
-	    <div class="pin">
-            <div id="disk_writes" style="width: 600px; height: 500px;"></div>
-        </div>
-	    <div class="pin">
-            <div id="interface_rx" style="width: 600px; height: 500px;"></div>
-        </div>
-	    <div class="pin">
-            <div id="interface_tx" style="width: 600px; height: 500px;"></div>
-        </div>
-	</div>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar" id="myTab">
+        <li class="active"><a href="#stats" data-toggle="tab">Load Average / Memory Usage</a></li>
+        <li><a href="#disk" data-toggle="tab">Disk Information</a></li>
+        <li><a href="#network" data-toggle="tab">Network Information</a></li>
+        <li><a href="#logs" data-toggle="tab">Logs</a></li>
+        <li><a href="#export" data-toggle="tab">Export</a></li>
+      </ul>
+   </div>
+   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+     <h1 class="page-header">Dashboard</h1>
+     <div class="tab-content">
+       <div class="tab-pane active" id="stats">
+        <div id="stats_chart" style="width: 600px; height: 500px;">Loading...</div>
+       </div>
+       <div class="tab-pane" id="disk">
+        <div id="partitions" style="width: 600px; height: 500px;"></div>
+        <div id="disk_reads" style="width: 600px; height: 500px;"></div>
+        <div id="disk_writes" style="width: 600px; height: 500px;"></div>
+       </div>
+       <div class="tab-pane" id="network">
+        <div id="interface_rx" style="width: 600px; height: 500px;"></div>
+        <div id="interface_tx" style="width: 600px; height: 500px;"></div>
+       </div>
+       <div class="tab-pane" id="logs">Logs</div>
+       <div class="tab-pane" id="export">Export</div>
+     </div>
+   </div>
+  </div>
 </div>
+<script>
+    $(function () {
+        $('#myTab a:first').tab('show')
+    })
+</script>
 <script>
 var buttons =  [{
                 type: 'minute',
@@ -91,7 +107,7 @@ function net_io_formatter() {
 
 $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
     // create the chart
-    $('#stats').highcharts('StockChart', {
+    $('#stats_chart').highcharts('StockChart', {
         rangeSelector: {
             buttons: buttons,
             selected: 1
@@ -148,7 +164,7 @@ $.getJSON('/load_data/partitions/<%= @current_computer.id %>', function(data) {
             }
         });
     });
-    $('#paritions').highcharts('StockChart', {
+    $('#partitions').highcharts('StockChart', {
         title: {
             text: "Partitions"
         },        

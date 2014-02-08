@@ -6,6 +6,10 @@ class ComputersController < ApplicationController
         @computers = Computer.all
     end
 
+    def disks
+        @computers = Computer.all
+    end
+
     def index
         @computers = Computer.all
         @computers.each do |computer|

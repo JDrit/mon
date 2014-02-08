@@ -139,5 +139,5 @@ end
 
 
 if __FILE__ == $0
-    background_thread 1, 30
+    background_thread 1, 15
 end

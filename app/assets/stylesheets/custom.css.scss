@@ -1,7 +1,7 @@
 @import "bootstrap";
 
 body {
-	background: url(http://subtlepatterns.com/patterns/scribble_light.png) ;
+//	background: url(http://subtlepatterns.com/patterns/scribble_light.png) ;
 }
 
 .container {
@@ -20,3 +20,13 @@ body {
         width: 1400px;
     }
 }
+
+.sidebar {
+    position: fixed;
+}
+
+.navbar {
+    margin-bottom: 0px;
+    z-index: 2;
+}
+
