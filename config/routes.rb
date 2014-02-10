@@ -11,8 +11,7 @@ Mon::Application.routes.draw do
     match '/load_data/disk_writes/:id',   to: 'computers#get_disk_writes',   via: 'get'
     match '/load_data/interfaces_rx/:id', to: 'computers#get_interfaces_rx', via: 'get'
     match '/load_data/interfaces_tx/:id', to: 'computers#get_interfaces_tx', via: 'get'
-    
-    match '/computers/:id/disks',         to: 'computers#disks',             via: 'get'
+    match '/load_data/programs/:id',      to: 'computers#get_programs',      via: 'get'
 
     root 'computers#index'
   # The priority is based upon order of creation: first created -> highest priority.

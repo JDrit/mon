@@ -4,7 +4,9 @@ source 'https://rubygems.org'
 gem 'rails', '4.0.2'
 gem 'bootstrap-sass', '~> 3.1.0.1'
 gem 'highstock-rails'
-gem 'thin'
+#gem 'thin'
+gem 'unicorn'
+gem 'pg'
 gem 'bcrypt-ruby', '~> 3.1.2'
 
 # Use sqlite3 as the database for Active Record

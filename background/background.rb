@@ -34,7 +34,7 @@ end
 
 def get_processes
     processes = []
-    stdin, stdout, stderr = Open3.popen3("ps aux --sort -%cpu | head -n15")
+    stdin, stdout, stderr = Open3.popen3("ps aux --sort -%cpu | head -n21")
     stdout.readlines.each do |line|
         line_split = line.split(/\s+/)
         next if line_split[0] == "USER"

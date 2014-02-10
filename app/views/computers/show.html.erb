@@ -3,20 +3,43 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-sm-3 col-md-2 sidebar">
+    <div class="col-sm-3 col-md-1 sidebar">
       <ul class="nav nav-sidebar" id="myTab">
-        <li class="active"><a href="#stats" data-toggle="tab">Load Average / Memory Usage</a></li>
+        <li class="active"><a href="#stats" data-toggle="tab">Load Usage</a></li>
         <li><a href="#disk" data-toggle="tab">Disk Information</a></li>
         <li><a href="#network" data-toggle="tab">Network Information</a></li>
         <li><a href="#logs" data-toggle="tab">Logs</a></li>
         <li><a href="#export" data-toggle="tab">Export</a></li>
       </ul>
    </div>
-   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-1 main">
      <h1 class="page-header">Dashboard</h1>
      <div class="tab-content">
        <div class="tab-pane active" id="stats">
-        <div id="stats_chart" style="width: 600px; height: 500px;">Loading...</div>
+        <div class="row">   
+          <div class="col-md-6">
+            <div id="stats_chart" style="width: 500px; height: 500px;">Loading...</div>
+          </div>
+          <div class="col-md-6">
+              <h3 id="program_date"><%= @programs[-1].timestamp if @programs.length != 0 %></h3>
+            <table class="table table-condensed" style="width: 500px;">
+              <thead>
+                <th>Name:</th>
+                <th>Load Usage:</th>
+                <th>Memory Usage</th>
+              </thead>
+              <tbody id="program_table">
+              <% @programs.each do |program| %>
+                <tr>
+                  <td><%= program.name %></td>
+                  <td><%= program.load_usage %></td>
+                  <td><%= program.memory_usage %></td>
+                </tr>
+              <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
        </div>
        <div class="tab-pane" id="disk">
         <div id="partitions" style="width: 600px; height: 500px;"></div>
@@ -36,7 +59,8 @@
 <script>
     $(function () {
         $('#myTab a:first').tab('show')
-    })
+    });
+    $("#program_date").html(new Date(<%= @programs[-1].timestamp * 1000 if @programs.length != 0 %>).toString());
 </script>
 <script>
 var buttons =  [{
@@ -106,6 +130,11 @@ function net_io_formatter() {
 
 
 $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+    });
     // create the chart
     $('#stats_chart').highcharts('StockChart', {
         rangeSelector: {
@@ -135,6 +164,21 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             name: 'Load Average',
             data: data['cpu'],
             gapSize: 5,
+            point: {
+                events: {
+                    mouseOver: function() {
+                        $.getJSON('/load_data/programs/<%= @current_computer.id %>?date=' + this.x, function(data) {
+                            $("#program_table").empty();
+                            $("#program_date").html(new Date(data['date'] * 1000.0).toString());
+                            data['programs'].forEach(function(program) {
+                                $('#program_table').append('<tr><td>' + program.name + 
+                                    '</td><td>' + program.load_usage + '</td><td>' + 
+                                    program.memory_usage + '</td></tr>');
+                            });
+                        });
+                    }        
+                }
+            },
             tooltip: {
                 valueDecimals: 2,
             }    
