@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140210110038) do
+ActiveRecord::Schema.define(version: 20140213003737) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,6 +21,7 @@ ActiveRecord::Schema.define(version: 20140210110038) do
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "uptime"
   end
 
   add_index "computers", ["api_key"], name: "index_computers_on_api_key", unique: true, using: :btree
@@ -70,6 +71,7 @@ ActiveRecord::Schema.define(version: 20140210110038) do
   end
 
   add_index "programs", ["computer_id"], name: "index_programs_on_computer_id", using: :btree
+  add_index "programs", ["timestamp"], name: "index_programs_on_timestamp", using: :btree
 
   create_table "stats", force: true do |t|
     t.integer  "computer_id"

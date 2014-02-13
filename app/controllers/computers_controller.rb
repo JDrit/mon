@@ -90,10 +90,31 @@ class ComputersController < ApplicationController
         render :json => interfaces_tx
     end
 
+    # gets the programs running at the given time. The interval is needed 
+    # since highcharts groups the data points.
+    # :date = the timestamp for the stat
+    # :interval = the interval to search
+    # :sort = what to order by cpu, or mem
     def get_programs
         date = params[:date].to_i / 1000
-        render :json => { programs: @current_computer.programs.where(timestamp: date).order('load_usage desc') , 
-                          date: date.to_f }
+        interval = params[:interval].to_i / 1000
+        if params[:sort] == "cpu"
+            sort = "load_usage"
+        else
+            sort = "memory_usage"
+        end
+        programs = @current_computer.programs.where(
+            timestamp: (date - interval)..(date + interval))
+            .order("timestamp, #{sort} desc").limit(20)
+        return_data = []
+        programs.each do |program|
+            if program.timestamp == programs[0].timestamp
+                return_data << program
+            else
+                break
+            end
+        end
+        render :json => { programs: return_data, date: date }
     end
     
     private

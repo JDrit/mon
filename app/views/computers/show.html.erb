@@ -17,12 +17,15 @@
      <div class="tab-content">
        <div class="tab-pane active" id="stats">
         <div class="row">   
-          <div class="col-md-6">
-            <div id="stats_chart" style="width: 500px; height: 500px;">Loading...</div>
+          <div class="col-md-7">
+            <div id="stats_chart" style="height: 500px;">Loading...</div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-5">
+              <div class="well">
+                <h5><strong>Uptime:</strong> <%= display_uptime @current_computer.uptime %></h5>
+              </div>
               <h3 id="program_date"><%= @programs[-1].timestamp if @programs.length != 0 %></h3>
-            <table class="table table-condensed" style="width: 500px;">
+            <table class="table table-condensed table-hover">
               <thead>
                 <th>Name:</th>
                 <th>Load Usage:</th>
@@ -42,13 +45,13 @@
         </div>
        </div>
        <div class="tab-pane" id="disk">
-        <div id="partitions" style="width: 600px; height: 500px;"></div>
-        <div id="disk_reads" style="width: 600px; height: 500px;"></div>
-        <div id="disk_writes" style="width: 600px; height: 500px;"></div>
+        <div id="partitions" style="width: 700px; height: 500px;"></div>
+        <div id="disk_reads" style="width: 700px; height: 500px;"></div>
+        <div id="disk_writes" style="width: 700px; height: 500px;"></div>
        </div>
        <div class="tab-pane" id="network">
-        <div id="interface_rx" style="width: 600px; height: 500px;"></div>
-        <div id="interface_tx" style="width: 600px; height: 500px;"></div>
+        <div id="interface_rx" style="width: 700px; height: 500px;"></div>
+        <div id="interface_tx" style="width: 700px; height: 500px;"></div>
        </div>
        <div class="tab-pane" id="logs">Logs</div>
        <div class="tab-pane" id="export">Export</div>
@@ -127,6 +130,15 @@ function net_io_formatter() {
     });
     return s;
 }
+function program_table(data) {
+    $("#program_table").empty();
+    $("#program_date").html(new Date(data['date'] * 1000.0).toString());
+    data['programs'].forEach(function(program) {
+        $('#program_table').append('<tr><td>' + program.name + 
+            '</td><td>' + program.load_usage + '</td><td>' + 
+            program.memory_usage + '</td></tr>');
+    });
+}
 
 
 $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
@@ -167,15 +179,9 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             point: {
                 events: {
                     mouseOver: function() {
-                        $.getJSON('/load_data/programs/<%= @current_computer.id %>?date=' + this.x, function(data) {
-                            $("#program_table").empty();
-                            $("#program_date").html(new Date(data['date'] * 1000.0).toString());
-                            data['programs'].forEach(function(program) {
-                                $('#program_table').append('<tr><td>' + program.name + 
-                                    '</td><td>' + program.load_usage + '</td><td>' + 
-                                    program.memory_usage + '</td></tr>');
-                            });
-                        });
+                        $.getJSON('/load_data/programs/<%= @current_computer.id %>?date=' + this.x + 
+                                '&interval=' + this.series.closestPointRange + 
+                                '&sort=cpu', program_table); 
                     }        
                 }
             },
@@ -188,6 +194,15 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             data: data['mem'],
             yAxis: 1,
             gapSize: 5,
+            point: {
+                events: {
+                    mouseOver: function() {
+                        $.getJSON('/load_data/programs/<%= @current_computer.id %>?date=' + this.x + 
+                                '&interval=' + this.series.closestPointRange + 
+                                '&sort=mem', program_table); 
+                    }        
+                }
+            },
             tooltip: {
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} MB</b><br/>',
                 valueDecimals: 0
@@ -325,7 +340,7 @@ $.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>', function(data)
             min: 0
         },
         tooltip: {
-            formatter: net_io_formatter
+            formatter: net_io_formatter,
         },
         rangeSelector: {
             buttons: buttons,

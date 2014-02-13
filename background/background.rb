@@ -97,8 +97,8 @@ def get_interfaces_info
     return data, ticks()
 end
 
-def background_thread api_key, interval
-    uri = URI.parse("http://localhost:32400/api/add_entry")
+def background_thread url, api_key, interval
+    uri = URI.parse(url + "/api/add_entry")
     while true
         begin
             b_i_info, b_i_time = get_interfaces_info
@@ -123,7 +123,8 @@ def background_thread api_key, interval
                      "disks" => disk_data, 
                      "programs" => get_processes, 
                      "partitions" => get_partition_stats,
-                     "interfaces" => interface_data }
+                     "interfaces" => interface_data,
+                     "uptime" => ticks }
             headers = { "Content-Type" => "application/json" }
             http = Net::HTTP.new(uri.host, uri.port)
             request = Net::HTTP::Post.new(uri.request_uri, headers)
@@ -139,5 +140,10 @@ end
 
 
 if __FILE__ == $0
-    background_thread 1, 15
+    if ARGV.length != 1
+        puts "no given url"
+        puts "run: #{__FILE__} url"
+    else
+        background_thread ARGV[0], 1, 15
+    end
 end

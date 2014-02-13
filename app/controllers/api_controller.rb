@@ -3,6 +3,8 @@ class ApiController < ApplicationController
     
     def add_entry
         date = Time.now.getutc.to_i
+        @current_computer.uptime = params[:uptime]
+        @current_computer.save
         stat = @current_computer.stats.new(timestamp: date, 
                                            load_average: params[:load_average],
                                            memory_usage: params[:memory_usage],
