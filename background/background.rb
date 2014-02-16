@@ -20,28 +20,40 @@ def get_memory_usage
 end
 
 def get_partition_stats
-    disks = []
-    Filesystem.mounts do |mount|
+    return Filesystem.mounts.map do |mount|
         stat = Filesystem.stat mount.mount_point
         next if stat.block_size * stat.blocks_available / 1024 == 0 || 
             stat.filesystem_id == 0 || mount.name == "rootfs"
-        disks << {name: mount.name, cap: stat.blocks * stat.block_size / 1024,
-                  usage: stat.blocks * stat.block_size / 1024 - 
-                         stat.block_size * stat.blocks_available / 1024}
+        { name: mount.name, cap: stat.blocks * stat.block_size / 1024,
+          usage: stat.blocks * stat.block_size / 1024 - 
+                 stat.block_size * stat.blocks_available / 1024 }
     end
-    return disks
 end
 
-def get_processes
-    processes = []
-    stdin, stdout, stderr = Open3.popen3("ps aux --sort -%cpu | head -n21")
+def get_stats
+    processes = Hash.new
+    stdin, stdout, stderr = Open3.popen3("ps aux --sort -%cpu")
     stdout.readlines.each do |line|
         line_split = line.split(/\s+/)
         next if line_split[0] == "USER"
-        processes << {name: line_split[10], load_usage: line_split[2], 
-                      memory_usage: line_split[3]}
+        cmd = line_split[10..line_split.length].join(" ")
+        cmd = cmd[1..-2] if cmd[0] == "[" && cmd[-1] == "]"
+        processes[cmd.strip] = { load_usage: line_split[2], 
+                                 memory_usage: line_split[3], 
+                                 user: line_split[0] }
     end
     return processes
+end
+
+def get_program_info
+    programs = Hash.new
+    Dir.entries("/proc").select {|f| !File.directory?(f) && f.match(/^(\d)+$/) }.each do |pid|
+        cmd_line = File.read("/proc/" + pid + "/cmdline").gsub("\u0000", " ")[0..-2]
+        cmd_line = File.read("/proc/" + pid + "/stat").split(" ")[1][1..-2] if cmd_line == ""
+        lines = File.readlines("/proc/" + pid + "/io")
+        programs[cmd_line.strip] = [lines[4].split(":")[1].to_i, lines[5].split(":")[1].to_i]
+    end
+    return programs, ticks()
 end
 
 def ticks
@@ -61,26 +73,6 @@ def get_disks_sector_info
         data[name] = [line_split[5].to_i, line_split[9].to_i] 
     end
     return data, ticks()
-end
-
-def get_disk_stats
-    b_sectors, b_time = get_disks_sector_info
-    sleep(1)
-    e_sectors, e_time = get_disks_sector_info
-    return e_sectors.keys.map { |key| 
-        {name: "/dev/" + key, 
-         read: ((e_sectors[key][0] - b_sectors[key][0]) * 512 / (e_time - b_time)).to_i,
-         write: ((e_sectors[key][1] - b_sectors[key][1]) * 512 / (e_time - b_time)).to_i } }
-end
-
-def get_interfaces_stats
-    b_info, b_time = get_interfaces_info
-    sleep(1)
-    e_info, e_time = get_interfaces_info
-    return e_info.keys.map { |key|
-        {name: key,
-        rx: ((e_info[key][0] - b_info[key][0]) / (e_time - b_time)).to_i, 
-        tx: ((e_info[key][1] - b_info[key][1]) / (e_time - b_time)).to_i } }
 end
 
 def get_interfaces_info
@@ -103,28 +95,39 @@ def background_thread url, api_key, interval
         begin
             b_i_info, b_i_time = get_interfaces_info
             b_d_sectors, b_d_time = get_disks_sector_info
-            sleep(5)
+            b_program_io, b_program_time = get_program_info
+            sleep(interval)
             e_i_info, e_i_time = get_interfaces_info
             e_d_sectors, e_d_time = get_disks_sector_info
-
+            e_program_io, e_program_time = get_program_info
+            program_stats = get_stats
+            
             interface_data = e_i_info.keys.map { |key|
-                {name: key,
-                 rx: ((e_i_info[key][0] - b_i_info[key][0]) / (e_i_time - b_i_time)).to_i, 
-                 tx: ((e_i_info[key][1] - b_i_info[key][1]) / (e_i_time - b_i_time)).to_i } }
+                { name: key,
+                  rx: ((e_i_info[key][0] - b_i_info[key][0]) / (e_i_time - b_i_time)).to_i, 
+                  tx: ((e_i_info[key][1] - b_i_info[key][1]) / (e_i_time - b_i_time)).to_i } }
             disk_data = e_d_sectors.keys.map { |key| 
-                {name: "/dev/" + key, 
-                 read: ((e_d_sectors[key][0] - b_d_sectors[key][0]) * 512 / (e_d_time - b_d_time)).to_i,
-                 write: ((e_d_sectors[key][1] - b_d_sectors[key][1]) * 512 / (e_d_time - b_d_time)).to_i } }
-
-
-            data = { "api_key" => api_key, 
-                     "load_average" => get_load_average, 
-                     "memory_usage" => get_memory_usage, 
-                     "disks" => disk_data, 
-                     "programs" => get_processes, 
-                     "partitions" => get_partition_stats,
-                     "interfaces" => interface_data,
-                     "uptime" => ticks }
+                { name: "/dev/" + key, 
+                  read: ((e_d_sectors[key][0] - b_d_sectors[key][0]) * 512 / (e_d_time - b_d_time)).to_i,
+                  write: ((e_d_sectors[key][1] - b_d_sectors[key][1]) * 512 / (e_d_time - b_d_time)).to_i } }
+            program_data = e_program_io.keys.map { |key|
+                { name: key, 
+                  load_usage: program_stats[key][:load_usage],
+                  memory_usage: program_stats[key][:memory_usage],
+                  user: program_stats[key][:user],
+                  read: ((e_program_io[key][0] - b_program_io[key][0]) / 
+                         (e_program_time - b_program_time)).to_i,
+                  write: ((e_program_io[key][1] - b_program_io[key][1]) / 
+                         (e_program_time - b_program_time)).to_i } }
+            
+            data = { api_key: api_key, 
+                     load_average: get_load_average, 
+                     memory_usage: get_memory_usage, 
+                     disks: disk_data, 
+                     programs: program_data, 
+                     partitions: get_partition_stats,
+                     interfaces: interface_data,
+                     uptime: ticks }
             headers = { "Content-Type" => "application/json" }
             http = Net::HTTP.new(uri.host, uri.port)
             request = Net::HTTP::Post.new(uri.request_uri, headers)
@@ -140,10 +143,11 @@ end
 
 
 if __FILE__ == $0
+    raise 'Must run as root' unless Process.uid == 0
     if ARGV.length != 1
         puts "no given url"
         puts "run: #{__FILE__} url"
     else
-        background_thread ARGV[0], 1, 15
+        background_thread ARGV[0], 1, 5
     end
 end

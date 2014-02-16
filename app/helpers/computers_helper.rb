@@ -21,6 +21,18 @@ module ComputersHelper
         end
     end
 
+    def display_disk_speed(bytes)
+        if bytes > 1024 * 1024 * 1024
+            return (bytes.to_f / 1024 / 1024 / 1024).round(2).to_s + "GB/s"
+        elsif bytes > 1024 * 1024
+            return (bytes.to_f / 1024 / 1024).round(2).to_s + "MB/s"
+        elsif bytes > 1024
+            return (bytes.to_f / 1024).round(2).to_s + "KB/s"
+        else
+            return bytes.to_s + "B/s"
+        end
+    end
+
     def display_uptime(seconds)
         mm, ss = seconds.divmod(60)
         hh, mm = mm.divmod(60)

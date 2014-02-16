@@ -6,7 +6,13 @@ class ComputersController < ApplicationController
         @computers = Computer.all
         if @current_computer.stats.length > 0
             date = @current_computer.stats.last.timestamp
-            @programs = @current_computer.programs.where(timestamp: date).order("load_usage desc")
+            @programs = []
+            @current_computer.programs.where(timestamp: date)
+                .order("load_usage desc, memory_usage desc").limit(20)
+                .each do |program|
+                    program.name = program.name.truncate 40
+                    @programs << program
+            end
         else
             @programs = []
         end
@@ -100,15 +106,24 @@ class ComputersController < ApplicationController
         interval = params[:interval].to_i / 1000
         if params[:sort] == "cpu"
             sort = "load_usage"
-        else
+            sort2 = "memory_usage"
+        elsif params[:sort] == "mem"
             sort = "memory_usage"
+            sort2 = "load_usage"
+        elsif params[:sort] == "read"
+            sort = "read"
+            sort2 = "write"
+        else
+            sort = "write"
+            sort2 = "read"
         end
         programs = @current_computer.programs.where(
             timestamp: (date - interval)..(date + interval))
-            .order("timestamp, #{sort} desc").limit(20)
+            .order("timestamp, #{sort} desc, #{sort2} desc").limit(20)
         return_data = []
         programs.each do |program|
             if program.timestamp == programs[0].timestamp
+                program.name = program.name.truncate 40
                 return_data << program
             else
                 break

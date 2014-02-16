@@ -21,7 +21,10 @@ class ApiController < ApplicationController
             program = @current_computer.programs.new(timestamp: date,
                                  name: program_params[:name],
                                  load_usage: program_params[:load_usage],
-                                 memory_usage: program_params[:memory_usage])
+                                 memory_usage: program_params[:memory_usage],
+                                 user: program_params[:user], 
+                                 read: program_params[:read],
+                                 write: program_params[:write])
             render :json => {:status => "error"} if !program.save
         end
         params[:partitions].each do |partition_params|
