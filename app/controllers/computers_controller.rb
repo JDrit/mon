@@ -27,7 +27,7 @@ class ComputersController < ApplicationController
         @computers.each do |computer|
             stat = computer.stats.last 
             if !stat.nil?
-                computer.load_avg = stat.load_average
+                computer.load_avg = stat.load_average.to_f
                 computer.mem_usage = stat.memory_usage 
                 computer.disk_cap = computer.partitions.sum(:cap, :conditions => 
                                                             { :timestamp => stat.timestamp })

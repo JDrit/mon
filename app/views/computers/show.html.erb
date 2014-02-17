@@ -24,12 +24,12 @@
               <div class="well">
                 <h5><strong>Uptime:</strong> <%= display_uptime @current_computer.uptime %></h5>
               </div>
-              <h3 id="program_date"><%= @programs[-1].timestamp if @programs.length != 0 %></h3>
+              <h4 id="program_date"><%= @programs[-1].timestamp if @programs.length != 0 %></h4>
             <table class="table table-condensed table-hover">
               <thead>
                 <th>Name:</th>
                 <th>CPU Usage:</th>
-                <th>Memory Usage</th>
+                <th>Memory Usage:</th>
                 <th>User</th>
               </thead>
               <tbody id="program_table">
@@ -56,7 +56,7 @@
            <div class="tab-pane active" id="disk_reads_tab">
              <div class="row">
                <div class="col-md-7">
-                 <div id="disk_reads" style="height: 500px;">Loading...</div>
+                 <div id="disk_reads">Loading...</div>
                </div>
                <div class="col-md-5">
                  <table class="table table-condensed table-hover">
@@ -81,16 +81,49 @@
              </div>
            </div>
            <div class="tab-pane" id="disk_writes_tab">
-             <div id="disk_writes" style="width: 700px; height: 500px;">Loading...</div>
+             <div class="row">
+               <div class="col-md-7">
+                <div id="disk_writes">Loading...</div>
+               </div>
+               <div class="col-md-5">
+                 <table class="table table-condensed table-hover">
+                   <thead>
+                     <th>Name:</th>
+                     <th>Reads:</th>
+                     <th>Writes:</th>
+                     <th>User</th>
+                   </thead>
+                   <tbody id="disk_writes_table">
+                     <% @programs.each do |program| %>
+                       <tr>
+                         <td><small><%= program.name %></small></td>
+                         <td><%= display_disk_speed program.read %></td>
+                         <td><%= display_disk_speed program.write %></td>
+                         <td><%= program.user %></td>
+                      </tr>
+                     <% end %>
+                   </tbody>
+                 </table>
+               </div>
+             </div>
            </div>
            <div class="tab-pane" id="disk_sizes_tab">
-             <div id="partitions" style="width: 700px; height: 500px;">Loading...</div>
+             <div id="partitions" style="width: 80%;">Loading...</div>
            </div>
          </div>
        </div>
        <div class="tab-pane fade" id="network">
-        <div id="interface_rx" style="width: 700px; height: 500px;"></div>
-        <div id="interface_tx" style="width: 700px; height: 500px;"></div>
+         <ul class="nav nav-tabs">
+           <li class="active"><a href="#interface_rx_tab" data-toggle="tab">Network Incoming</a></li>
+           <li><a href="#interface_tx_tab" data-toggle="tab">Network Outgoing</a></li>
+         </ul>
+         <div class="tab-content">
+           <div class="tab-pane active" id="interface_rx_tab">
+             <div id="interface_rx" style="width: 80%; height: 500px;">Loading...</div>
+           </div>
+           <div class="tab-pane" id="interface_tx_tab">
+             <div id="interface_tx" style="width: 80%; height: 500px;">Loading...</div>
+           </div>
        </div>
        <div class="tab-pane fade" id="logs">Logs</div>
        <div class="tab-pane fade" id="export">Export</div>
@@ -189,6 +222,17 @@ function disk_reads_table(data) {
             program.user + '</td></tr>');
     });
 }
+
+function disk_writes_table(data) {
+    $("#disk_writes_table").empty();
+    data['programs'].forEach(function(program) {
+        $('#disk_writes_table').append('<tr><td><small>' + program.name + 
+            '</small></td><td>' + display_disk_speed(program.read) + '</td><td>' + 
+            display_disk_speed(program.write) + '</td><td>' + 
+            program.user + '</td></tr>');
+    });
+}
+
 function display_disk_speed(bytes) {
     if (parseInt(bytes) > 1024 * 1024 * 1024)
         return (parseInt(bytes) / 1024 / 1024 / 1024).toFixed(2) + "GB/s";
@@ -233,7 +277,6 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             type: 'areaspline',
             name: 'Load Average',
             data: data['cpu'],
-            gapSize: 5,
             point: {
                 events: {
                     mouseOver: function() {
@@ -251,7 +294,6 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             name: 'Memory Usage',
             data: data['mem'],
             yAxis: 1,
-            gapSize: 5,
             point: {
                 events: {
                     mouseOver: function() {
@@ -274,7 +316,6 @@ $.getJSON('/load_data/partitions/<%= @current_computer.id %>', function(data) {
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
             data: data[key],
-            gapSize: 5,
             tooltip: {
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} GB</b><br/>',
                 valueDecimals: 2
@@ -300,8 +341,8 @@ $.getJSON('/load_data/disk_reads/<%= @current_computer.id %>', function(data) {
     var series = [];
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
+            type: 'spline',
             data: data[key],
-            gapSize: 5,
             point: {
                 events: {
                     mouseOver: function() {
@@ -335,8 +376,18 @@ $.getJSON('/load_data/disk_writes/<%= @current_computer.id %>', function(data) {
     var series = [];
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
+            type: 'spline',
             data: data[key],
-            gapSize: 5
+            point: {
+                events: {
+                    mouseOver: function() {
+                        $.getJSON('/load_data/programs/<%= @current_computer.id %>?date=' + this.x + 
+                            '&interval=' + this.series.closestPointRange + 
+                            '&sort=write', disk_writes_table); 
+                    }        
+                }
+            }
+
         });
     });
 
@@ -361,8 +412,8 @@ $.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>', function(data)
     var series = [];
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
+            type: 'spline',
             data: data[key],
-            gapSize: 5,
             tooltip: {
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} kb/s</b><br/>',
                 valueDecimals: 0
@@ -391,8 +442,8 @@ $.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>', function(data)
     var series = [];
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
+            type: 'spline',
             data: data[key],
-            gapSize: 5,
             tooltip: {
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} Kb/s</b><br/>',
                 valueDecimals: 0

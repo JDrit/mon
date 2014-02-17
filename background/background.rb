@@ -70,6 +70,7 @@ def get_disks_sector_info
         line_split = line.split(" ")
         next if line_split[5] == "0" && line_split[9] == "0"
         name = line_split[2]
+        next if !(name[-1].match(/^(\d)+$/)) 
         data[name] = [line_split[5].to_i, line_split[9].to_i] 
     end
     return data, ticks()
@@ -92,7 +93,6 @@ end
 def background_thread url, api_key, interval
     uri = URI.parse(url + "/api/add_entry")
     while true
-        begin
             b_i_info, b_i_time = get_interfaces_info
             b_d_sectors, b_d_time = get_disks_sector_info
             b_program_io, b_program_time = get_program_info
@@ -111,6 +111,7 @@ def background_thread url, api_key, interval
                   read: ((e_d_sectors[key][0] - b_d_sectors[key][0]) * 512 / (e_d_time - b_d_time)).to_i,
                   write: ((e_d_sectors[key][1] - b_d_sectors[key][1]) * 512 / (e_d_time - b_d_time)).to_i } }
             program_data = e_program_io.keys.map { |key|
+                next if b_program_io[key] == nil
                 { name: key, 
                   load_usage: program_stats[key][:load_usage],
                   memory_usage: program_stats[key][:memory_usage],
@@ -135,19 +136,15 @@ def background_thread url, api_key, interval
             response = http.request request
             puts response.body
             sleep interval
-        rescue
-            puts "error"
-        end
     end
 end
 
 
 if __FILE__ == $0
     raise 'Must run as root' unless Process.uid == 0
-    if ARGV.length != 1
-        puts "no given url"
-        puts "run: #{__FILE__} url"
+    if ARGV.length != 3
+        puts "run: #{__FILE__} [url] [computer api token] [interval]"
     else
-        background_thread ARGV[0], 1, 5
+        background_thread ARGV[0], ARGV[1].to_i, ARGV[2].to_i
     end
 end
