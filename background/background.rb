@@ -93,6 +93,7 @@ end
 def background_thread url, api_key, interval
     uri = URI.parse(url + "/api/add_entry")
     while true
+        begin
             b_i_info, b_i_time = get_interfaces_info
             b_d_sectors, b_d_time = get_disks_sector_info
             b_program_io, b_program_time = get_program_info
@@ -136,6 +137,9 @@ def background_thread url, api_key, interval
             response = http.request request
             puts response.body
             sleep interval
+        rescue
+            puts "error"
+        end
     end
 end
 

@@ -2,6 +2,29 @@ class ComputersController < ApplicationController
     before_action :signed_in_user
     before_action :get_computer
 
+    def new
+        @computers = Computer.all
+        @new_computer = Computer.new
+    end
+
+    def destroy
+        Computer.find_by_id(params[:id]).destroy
+        flash[:success] = "Computer Deleted"
+        redirect_to new_computer_path
+    end
+
+    def create
+        @new_computer = Computer.new(computer_params)
+        if @new_computer.save
+            flash[:success] = "Computer successfully created"
+            redirect_to new_computer_path
+        else
+            @computers = Computer.all
+            flash[:danger] = "Could not create computer"
+            render "new"
+        end
+    end
+
     def show
         @computers = Computer.all
         if @current_computer.stats.length > 0
@@ -133,6 +156,10 @@ class ComputersController < ApplicationController
     end
     
     private
+        def computer_params
+            params.require(:computer).permit(:name, :api_key)
+        end
+
         def get_computer
             @id = params['id']
             @current_computer = Computer.find_by_id(@id)

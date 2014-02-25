@@ -34,6 +34,7 @@ module ComputersHelper
     end
 
     def display_uptime(seconds)
+        return "- na -" if seconds.nil?
         mm, ss = seconds.divmod(60)
         hh, mm = mm.divmod(60)
         dd, hh = hh.divmod(24)
