@@ -9,7 +9,6 @@ class ComputersController < ApplicationController
 
     def edit
         @computers = Computer.all
-        puts "edit"
     end
 
     def update
@@ -18,7 +17,7 @@ class ComputersController < ApplicationController
             flash[:success] = "Computer Updated"
             redirect_to edit_computer_path @current_computer
         else
-            flash[:danger] = "Could not update Computer"
+            flash[:danger] = "Could not update computer"
             render "edit"
         end
     end

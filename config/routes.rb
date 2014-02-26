@@ -1,6 +1,7 @@
 Mon::Application.routes.draw do
     resources :sessions, only: [:new, :create, :destroy]
     resources :computers
+    resources :users
     match 'api/add_entry',                to: 'api#add_entry',               via: 'post'
     match '/signin',                      to: 'sessions#new',                via: 'get'
     match '/signout',                     to: 'sessions#destroy',            via: 'delete'

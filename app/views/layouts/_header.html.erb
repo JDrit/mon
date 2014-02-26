@@ -22,6 +22,11 @@
         <ul class="nav navbar-nav navbar-right">
             <% if signed_in? %>
                 <li>
+                    <%= link_to new_user_path do %>
+                        Users <span class="glyphicon glyphicon-user"></span>
+                    <% end %>
+                </li>
+                <li>
                     <%= link_to new_computer_path do %>
                         Computers <span class="glyphicon glyphicon-cog"></span>
                     <% end %>

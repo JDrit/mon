@@ -1,0 +1,5 @@
+<% provide(:title, "Edit User") %>
+<h2>Edit User</h2>
+<br />
+<%= render :partial => "form", :locals => { :user => @new_user, :method => :put } %>
+

@@ -1,2 +1,53 @@
-<h1>Users#new</h1>
-<p>Find me in app/views/users/new.html.erb</p>
+<% provide(:title, "Users") %>
+<br />
+<div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Current Users</strong></div>
+    <!-- Table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>email</th>
+                <th>created at</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% @users.each do |user| %>
+                <tr>
+                    <td><%= user.name %></td>
+                    <td><%= user.email %></td>
+                    <td><%= user.created_at %></td>
+                    <td>
+                        <%= link_to [:edit, user] do %>
+                            <button type="button" class="btn btn-primary">Edit</button>
+                        <% end %>
+                        <button class="btn btn-danger" data-toggle="modal" data-target=".bs-example-modal-sm">Delete</button>
+                        <div class="modal fade bs-example-modal-sm" tabindex="-1" 
+                            role="dialog" aria-labelledby="mySmallModalLabel" 
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h4 class="modal-title" id="mySmallModalLabel">Delete?</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to?
+                                        <%= link_to user, method: :delete do %> 
+                                            <button type="button" class="btn btn-danger">Delete</button>
+                                        <% end %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            <% end %>
+        </tbody>
+    </table>
+</div>
+<h2>New User</h2>
+<%= render :partial => "form", :locals => { :user => @new_user, :method => :get } %>
+</div>
