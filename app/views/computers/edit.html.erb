@@ -1,0 +1,5 @@
+<% provide(:title, "Edit Computer") %>
+<h2>Edit Computer</h2>
+<br />
+<%= render :partial => "form", :locals => { :computer => @current_computer, :method => :put } %>
+

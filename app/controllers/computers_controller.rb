@@ -7,6 +7,22 @@ class ComputersController < ApplicationController
         @new_computer = Computer.new
     end
 
+    def edit
+        @computers = Computer.all
+        puts "edit"
+    end
+
+    def update
+        @computers = Computer.all
+        if @current_computer.update_attributes(computer_params)
+            flash[:success] = "Computer Updated"
+            redirect_to edit_computer_path @current_computer
+        else
+            flash[:danger] = "Could not update Computer"
+            render "edit"
+        end
+    end
+
     def destroy
         Computer.find_by_id(params[:id]).destroy
         flash[:success] = "Computer Deleted"

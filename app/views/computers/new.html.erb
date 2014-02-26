@@ -1,76 +1,53 @@
-<% provide(:title, "Computers") %>
+<% provide(:title, "New Computer") %>
 <br />
 <div class="panel panel-default">
-      <!-- Default panel contents -->
-      <div class="panel-heading"><strong>Current Computers</strong></div>
-        <!-- Table -->
-        <table class="table">
-            <thead>
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Current Computers</strong></div>
+    <!-- Table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Api Key</th>
+                <th>Up time</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% @computers.each do |computer| %>
                 <tr>
-                    <th>Name</th>
-                    <th>Api Key</th>
-                    <th>Up time</th>
-                    <th>Options</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% @computers.each do |computer| %>
-                    <tr>
-                        <td><%= computer.name %></td>
-                        <td><%= computer.api_key %></td>
-                        <td><%= display_uptime computer.uptime %></td>
-                        <td>
+                    <td><%= link_to computer.name, computer %></td>
+                    <td><%= computer.api_key %></td>
+                    <td><%= display_uptime computer.uptime %></td>
+                    <td>
+                        <%= link_to [:edit, computer] do %>
                             <button type="button" class="btn btn-primary">Edit</button>
-                            <button class="btn btn-danger" data-toggle="modal" data-target=".bs-example-modal-sm">Delete</button>
-                            <div class="modal fade bs-example-modal-sm" tabindex="-1" 
-                                role="dialog" aria-labelledby="mySmallModalLabel" 
-                                aria-hidden="true">
-                                <div class="modal-dialog modal-sm">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                            <h4 class="modal-title" id="mySmallModalLabel">Delete?</h4>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to?
-                                            <%= link_to computer, method: :delete do %> 
-                                                <button type="button" class="btn btn-danger">Delete</button>
-                                            <% end %>
-                                        </div>
+                        <% end %>
+                        <button class="btn btn-danger" data-toggle="modal" data-target=".bs-example-modal-sm">Delete</button>
+                        <div class="modal fade bs-example-modal-sm" tabindex="-1" 
+                            role="dialog" aria-labelledby="mySmallModalLabel" 
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h4 class="modal-title" id="mySmallModalLabel">Delete?</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to?
+                                        <%= link_to computer, method: :delete do %> 
+                                            <button type="button" class="btn btn-danger">Delete</button>
+                                        <% end %>
                                     </div>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
-                <% end %>
-            </tbody>
-        </table>
-    </div>
-    <br />
-    <%= form_for @new_computer do |f| %>
-        <% if @new_computer.errors[:name] != [] %>
-            <div class="form-group has-error">
-                <label class="control-label" for="inputError1">Name - <%= @new_computer.errors[:name][0] %></label>
-                <%= f.text_field :name, class: "form-control" %>
-            </div>
-        <% else %>
-                <%= f.label :name %>
-                <%= f.text_field :name, class: "form-control" %>
-        <% end %>
-
-        <% if @new_computer.errors[:api_key] != [] %>
-            <div class="form-group has-error">
-                <label class="control-label" for="inputError1">Api key - <%= @new_computer.errors[:api_key][0] %></label>
-                <%= f.text_field :api_key, class: "form-control" %>
-            </div>
-        <% else %>
-                <%= f.label :api_key %>
-                <%= f.text_field :api_key, class: "form-control" %>
-        <% end %>
-
-
-
-        <br />
-        <%= f.submit  class: "btn btn-large btn-primary" %>
-    <% end %>
+                        </div>
+                    </td>
+                </tr>
+            <% end %>
+        </tbody>
+    </table>
+</div>
+<h2>New Computer</h2>
+<%= render :partial => "form", :locals => { :computer => @new_computer, :method => :get } %>
 </div>
