@@ -7,11 +7,17 @@ Mon::Application.routes.draw do
     match '/signout',                     to: 'sessions#destroy',            via: 'delete'
 
     match '/load_data/stats/:id',         to: 'computers#get_stats',         via: 'get'
+    match '/load_data/stats/:id/current', to: 'computers#get_stats_current', via: 'get'
     match '/load_data/partitions/:id',    to: 'computers#get_partitions',    via: 'get'
+    match '/load_data/partitions/:id/current',    to: 'computers#get_partitions_current',    via: 'get'
     match '/load_data/disk_reads/:id',    to: 'computers#get_disk_reads',    via: 'get'
+    match '/load_data/disk_reads/:id/current',    to: 'computers#get_disk_reads_current',    via: 'get'
     match '/load_data/disk_writes/:id',   to: 'computers#get_disk_writes',   via: 'get'
+    match '/load_data/disk_writes/:id/current',   to: 'computers#get_disk_writes_current',   via: 'get'
     match '/load_data/interfaces_rx/:id', to: 'computers#get_interfaces_rx', via: 'get'
+    match '/load_data/interfaces_rx/:id/current', to: 'computers#get_interfaces_rx_current', via: 'get'
     match '/load_data/interfaces_tx/:id', to: 'computers#get_interfaces_tx', via: 'get'
+    match '/load_data/interfaces_tx/:id/current', to: 'computers#get_interfaces_tx_current', via: 'get'
     match '/load_data/programs/:id',      to: 'computers#get_programs',      via: 'get'
 
     root 'computers#index'

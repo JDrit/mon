@@ -88,14 +88,31 @@ class ComputersController < ApplicationController
         render :json => {cpu: cpu, mem: mem}
     end
 
+    def get_stats_current
+        stat = @current_computer.stats.last
+        render :json => { timestamp: stat.timestamp * 1000, 
+                          cpu: stat.load_average.to_f, 
+                          mem: stat.memory_usage.to_i / 1024 }
+    end
+
     def get_partitions
         partitions = Hash.new
-        @current_computer.partitions.select("timestamp, name, usage").order(:timestamp).each do |partition|
+        @current_computer.partitions.select("timestamp, name, usage").order(:timestamp, :name).each do |partition|
             partitions[partition.name] = [] if partitions[partition.name] == nil
             partitions[partition.name] << [partition.timestamp * 1000, 
                                     partition.usage.to_f / 1024 / 1024]
         end
         render :json => partitions
+    end
+
+    def get_partitions_current
+        timestamp = @current_computer.stats.last.timestamp
+        data = Hash.new
+        data[:timestamp] = timestamp * 1000
+        @current_computer.partitions.where(timestamp: timestamp).order(:name).each do |partition|
+            data[partition.name] = partition.usage.to_f / 1024 / 1024
+        end
+        render :json => data
     end
 
     def get_disk_reads
@@ -107,6 +124,16 @@ class ComputersController < ApplicationController
         render :json => disk_reads
     end
 
+    def get_disk_reads_current
+        timestamp = @current_computer.stats.last.timestamp
+        data = Hash.new
+        data[:timestamp] = timestamp * 1000
+        @current_computer.disks.where(timestamp: timestamp).order(:name).each do |disk|
+            data[disk.name] = disk.read.to_i
+        end
+        render :json => data
+    end
+
     def get_disk_writes
         disk_writes = Hash.new
         @current_computer.disks.select("timestamp, name, read, write").order(:timestamp).each do |disk|
@@ -114,6 +141,16 @@ class ComputersController < ApplicationController
             disk_writes[disk.name] << [disk.timestamp * 1000, disk.write.to_i]
         end
         render :json => disk_writes
+    end
+
+    def get_disk_writes_current
+        timestamp = @current_computer.stats.last.timestamp
+        data = Hash.new
+        data[:timestamp] = timestamp * 1000
+        @current_computer.disks.where(timestamp: timestamp).order(:name).each do |disk|
+            data[disk.name] = disk.write.to_i
+        end
+        render :json => data
     end
 
     def get_interfaces_rx
@@ -125,6 +162,16 @@ class ComputersController < ApplicationController
         render :json => interfaces_rx
     end
 
+    def get_interfaces_rx_current
+        timestamp = @current_computer.stats.last.timestamp
+        data = Hash.new
+        data[:timestamp] = timestamp * 1000
+        @current_computer.interfaces.where(timestamp: timestamp).order(:name).each do |interface|
+            data[interface.name] = interface.rx.to_i
+        end
+        render :json => data
+    end
+
     def get_interfaces_tx
         interfaces_tx = Hash.new
         @current_computer.interfaces.order(:timestamp).each do |interface|
@@ -133,6 +180,17 @@ class ComputersController < ApplicationController
         end
         render :json => interfaces_tx
     end
+
+    def get_interfaces_tx_current
+        timestamp = @current_computer.stats.last.timestamp
+        data = Hash.new
+        data[:timestamp] = timestamp * 1000
+        @current_computer.interfaces.where(timestamp: timestamp).order(:name).each do |interface|
+            data[interface.name] = interface.tx.to_i
+        end
+        render :json => data
+    end
+
 
     # gets the programs running at the given time. The interval is needed 
     # since highcharts groups the data points.

@@ -251,6 +251,20 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
     });
     // create the chart
     $('#stats_chart').highcharts('StockChart', {
+        chart: {
+            events: {
+                load: function() {
+                    var cpu = this.series[0];
+                    var mem = this.series[1];
+                    setInterval(function() {
+                        $.getJSON('/load_data/stats/<%= @current_computer.id %>/current', function(data) {
+                            cpu.addPoint([data['timestamp'], data['cpu']], true, true);    
+                            mem.addPoint([data['timestamp'], data['mem']], true, true);    
+                        });
+                    }, 30000);
+                }
+            }
+        },
         rangeSelector: {
             buttons: buttons,
             selected: 1
@@ -323,6 +337,20 @@ $.getJSON('/load_data/partitions/<%= @current_computer.id %>', function(data) {
         });
     });
     $('#partitions').highcharts('StockChart', {
+        chart: {
+            events: {
+                load: function() {
+                    var series = this.series;
+                    setInterval(function() {
+                        $.getJSON('/load_data/partitions/<%= @current_computer.id %>/current', function(data) {
+                            for (var i = 0 ; i < series.length ; i++) {
+                                series[i].addPoint([data['timestamp'], data[series[i].name]], true, true);
+                            }
+                        });
+                    }, 30000);
+                }
+            }
+        },
         title: {
             text: "Partitions"
         },        
@@ -356,6 +384,20 @@ $.getJSON('/load_data/disk_reads/<%= @current_computer.id %>', function(data) {
     });
 
     $('#disk_reads').highcharts('StockChart', {
+        chart: {
+            events: {
+                load: function() {
+                    var series = this.series;
+                    setInterval(function() {
+                        $.getJSON('/load_data/disk_reads/<%= @current_computer.id %>/current', function(data) {
+                            for (var i = 0 ; i < series.length ; i++) {
+                                series[i].addPoint([data['timestamp'], data[series[i].name]], true, true);
+                            }
+                        });
+                    }, 30000);
+                }
+            }
+        },
         title: {
             text: "Disk Reads"
         },       
@@ -392,6 +434,20 @@ $.getJSON('/load_data/disk_writes/<%= @current_computer.id %>', function(data) {
     });
 
     $('#disk_writes').highcharts('StockChart', {
+        chart: {
+            events: {
+                load: function() {
+                    var series = this.series;
+                    setInterval(function() {
+                        $.getJSON('/load_data/disk_writes/<%= @current_computer.id %>/current', function(data) {
+                            for (var i = 0 ; i < series.length ; i++) {
+                                series[i].addPoint([data['timestamp'], data[series[i].name]], true, true);
+                            }
+                        });
+                    }, 30000);
+                }
+            }
+        },
         title: {
             text: "Disk Writes"
         },       
@@ -422,6 +478,20 @@ $.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>', function(data)
     });
 
     $('#interface_rx').highcharts('StockChart', {
+        chart: {
+            events: {
+                load: function() {
+                    var series = this.series;
+                    setInterval(function() {
+                        $.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>/current', function(data) {
+                            for (var i = 0 ; i < series.length ; i++) {
+                                series[i].addPoint([data['timestamp'], data[series[i].name]], true, true);
+                            }
+                        });
+                    }, 30000);
+                }
+            }
+        },
         title: {
             text: "Interfaces Incoming"
         },       
@@ -451,6 +521,20 @@ $.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>', function(data)
         });
     });
     $('#interface_tx').highcharts('StockChart', {
+        chart: {
+            events: {
+                load: function() {
+                    var series = this.series;
+                    setInterval(function() {
+                        $.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>/current', function(data) {
+                            for (var i = 0 ; i < series.length ; i++) {
+                                series[i].addPoint([data['timestamp'], data[series[i].name]], true, true);
+                            }
+                        });
+                    }, 30000);
+                }
+            }
+        },
         title: {
             text: "Interfaces Outgoing"
         },       
