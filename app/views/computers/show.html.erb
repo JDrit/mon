@@ -56,7 +56,7 @@
            <div class="tab-pane active" id="disk_reads_tab">
              <div class="row">
                <div class="col-md-7">
-                 <div id="disk_reads">Loading...</div>
+                 <div id="disk_reads" style="height: 500px;">Loading...</div>
                </div>
                <div class="col-md-5">
                  <table class="table table-condensed table-hover">
@@ -83,7 +83,7 @@
            <div class="tab-pane" id="disk_writes_tab">
              <div class="row">
                <div class="col-md-7">
-                <div id="disk_writes">Loading...</div>
+                <div id="disk_writes" style="height: 500px;">Loading...</div>
                </div>
                <div class="col-md-5">
                  <table class="table table-condensed table-hover">
@@ -526,7 +526,7 @@ $.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>', function(data)
                 load: function() {
                     var series = this.series;
                     setInterval(function() {
-                        $.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>/current', function(data) {
+                        $.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>/current', function(data) {
                             for (var i = 0 ; i < series.length ; i++) {
                                 series[i].addPoint([data['timestamp'], data[series[i].name]], true, true);
                             }

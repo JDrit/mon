@@ -48,10 +48,13 @@ end
 def get_program_info
     programs = Hash.new
     Dir.entries("/proc").select {|f| !File.directory?(f) && f.match(/^(\d)+$/) }.each do |pid|
-        cmd_line = File.read("/proc/" + pid + "/cmdline").gsub("\u0000", " ")[0..-2]
-        cmd_line = File.read("/proc/" + pid + "/stat").split(" ")[1][1..-2] if cmd_line == ""
-        lines = File.readlines("/proc/" + pid + "/io")
-        programs[cmd_line.strip] = [lines[4].split(":")[1].to_i, lines[5].split(":")[1].to_i]
+        begin
+            cmd_line = File.read("/proc/" + pid + "/cmdline").gsub("\u0000", " ")[0..-2]
+            cmd_line = File.read("/proc/" + pid + "/stat").split(" ")[1][1..-2] if cmd_line == ""
+            lines = File.readlines("/proc/" + pid + "/io")
+            programs[cmd_line.strip] = [lines[4].split(":")[1].to_i, lines[5].split(":")[1].to_i]
+        rescue
+        end
     end
     return programs, ticks()
 end
@@ -93,7 +96,6 @@ end
 def background_thread url, api_key, interval
     uri = URI.parse(url + "/api/add_entry")
     while true
-        begin
             b_i_info, b_i_time = get_interfaces_info
             b_d_sectors, b_d_time = get_disks_sector_info
             b_program_io, b_program_time = get_program_info
@@ -112,7 +114,7 @@ def background_thread url, api_key, interval
                   read: ((e_d_sectors[key][0] - b_d_sectors[key][0]) * 512 / (e_d_time - b_d_time)).to_i,
                   write: ((e_d_sectors[key][1] - b_d_sectors[key][1]) * 512 / (e_d_time - b_d_time)).to_i } }
             program_data = e_program_io.keys.map { |key|
-                next if b_program_io[key] == nil
+                next if b_program_io[key] == nil or program_stats[key] == nil
                 { name: key, 
                   load_usage: program_stats[key][:load_usage],
                   memory_usage: program_stats[key][:memory_usage],
@@ -137,9 +139,6 @@ def background_thread url, api_key, interval
             response = http.request request
             puts response.body
             sleep interval
-        rescue
-            puts "error"
-        end
     end
 end
 

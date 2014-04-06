@@ -117,7 +117,7 @@ class ComputersController < ApplicationController
 
     def get_disk_reads
         disk_reads = Hash.new
-        @current_computer.disks.select("timestamp, name, read, write").order(:timestamp).each do |disk|
+        @current_computer.disks.select("timestamp, name, read, write").order(:timestamp, :name).each do |disk|
             disk_reads[disk.name] = [] if disk_reads[disk.name] == nil
             disk_reads[disk.name] << [disk.timestamp * 1000, disk.read.to_i]
         end
@@ -136,7 +136,7 @@ class ComputersController < ApplicationController
 
     def get_disk_writes
         disk_writes = Hash.new
-        @current_computer.disks.select("timestamp, name, read, write").order(:timestamp).each do |disk|
+        @current_computer.disks.select("timestamp, name, read, write").order(:timestamp, :name).each do |disk|
             disk_writes[disk.name] = [] if disk_writes[disk.name] == nil
             disk_writes[disk.name] << [disk.timestamp * 1000, disk.write.to_i]
         end
@@ -155,9 +155,9 @@ class ComputersController < ApplicationController
 
     def get_interfaces_rx
         interfaces_rx = Hash.new
-        @current_computer.interfaces.order(:timestamp).each do |interface|
+        @current_computer.interfaces.order(:timestamp, :name).each do |interface|
             interfaces_rx[interface.name] = [] if interfaces_rx[interface.name] == nil
-            interfaces_rx[interface.name] << [interface.timestamp * 1000, interface.rx.to_i]
+            interfaces_rx[interface.name] << [interface.timestamp * 1000, interface.rx.to_i * 8]
         end
         render :json => interfaces_rx
     end
@@ -167,16 +167,16 @@ class ComputersController < ApplicationController
         data = Hash.new
         data[:timestamp] = timestamp * 1000
         @current_computer.interfaces.where(timestamp: timestamp).order(:name).each do |interface|
-            data[interface.name] = interface.rx.to_i
+            data[interface.name] = interface.rx.to_i * 8
         end
         render :json => data
     end
 
     def get_interfaces_tx
         interfaces_tx = Hash.new
-        @current_computer.interfaces.order(:timestamp).each do |interface|
+        @current_computer.interfaces.order(:timestamp, :name).each do |interface|
             interfaces_tx[interface.name] = [] if interfaces_tx[interface.name] == nil
-            interfaces_tx[interface.name] << [interface.timestamp * 1000, interface.tx.to_i]
+            interfaces_tx[interface.name] << [interface.timestamp * 1000, interface.tx.to_i * 8]
         end
         render :json => interfaces_tx
     end
@@ -186,7 +186,7 @@ class ComputersController < ApplicationController
         data = Hash.new
         data[:timestamp] = timestamp * 1000
         @current_computer.interfaces.where(timestamp: timestamp).order(:name).each do |interface|
-            data[interface.name] = interface.tx.to_i
+            data[interface.name] = interface.tx.to_i * 8
         end
         render :json => data
     end
