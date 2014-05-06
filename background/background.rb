@@ -30,6 +30,18 @@ def get_partition_stats
     end
 end
 
+def get_mem_for_process pid
+    begin
+        File.readlines("/proc/#{pid}/status").each do |line|
+            return line.split(":")[1].to_i if line.match(/^VmSize/)
+        end
+        return 0
+    rescue
+        return 0
+    end
+end 
+
+
 def get_stats
     processes = Hash.new
     stdin, stdout, stderr = Open3.popen3("ps aux --sort -%cpu")
@@ -39,7 +51,7 @@ def get_stats
         cmd = line_split[10..line_split.length].join(" ")
         cmd = cmd[1..-2] if cmd[0] == "[" && cmd[-1] == "]"
         processes[cmd.strip] = { load_usage: line_split[2], 
-                                 memory_usage: line_split[3], 
+                                 memory_usage: get_mem_for_process(line_split[1]), 
                                  user: line_split[0] }
     end
     return processes

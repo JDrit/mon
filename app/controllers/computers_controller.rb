@@ -1,6 +1,6 @@
 class ComputersController < ApplicationController
     before_action :signed_in_user
-    before_action :get_computer
+    before_action :get_computer, except: [:index, :create, :edit, :new]
 
     def new
         @computers = Computer.all
@@ -23,7 +23,7 @@ class ComputersController < ApplicationController
     end
 
     def destroy
-        Computer.find_by_id(params[:id]).destroy
+        @current_computer.destroy
         flash[:success] = "Computer Deleted"
         redirect_to new_computer_path
     end
@@ -80,8 +80,9 @@ class ComputersController < ApplicationController
     def get_stats
         cpu = []
         mem = []
-        @current_computer.stats.select("timestamp, load_average, 
-                                       memory_usage").order(:timestamp).each do |stat|
+        @current_computer.stats.select("timestamp, load_average, memory_usage")
+                .where("created_at >= ?", 1.week.ago.utc)
+                .order(:timestamp).each do |stat|
             cpu << [stat.timestamp * 1000, stat.load_average.to_f]
             mem << [stat.timestamp * 1000, stat.memory_usage.to_i / 1024]
         end
@@ -97,7 +98,9 @@ class ComputersController < ApplicationController
 
     def get_partitions
         partitions = Hash.new
-        @current_computer.partitions.select("timestamp, name, usage").order(:timestamp, :name).each do |partition|
+        @current_computer.partitions.select("timestamp, name, usage")
+                .where("created_at >= ?", 1.week.ago.utc)
+                .order(:timestamp, :name).each do |partition|
             partitions[partition.name] = [] if partitions[partition.name] == nil
             partitions[partition.name] << [partition.timestamp * 1000, 
                                     partition.usage.to_f / 1024 / 1024]
@@ -117,7 +120,9 @@ class ComputersController < ApplicationController
 
     def get_disk_reads
         disk_reads = Hash.new
-        @current_computer.disks.select("timestamp, name, read, write").order(:timestamp, :name).each do |disk|
+        @current_computer.disks.select("timestamp, name, read, write")
+                .where("created_at >= ?", 1.week.ago.utc)
+                .order(:timestamp, :name).each do |disk|
             disk_reads[disk.name] = [] if disk_reads[disk.name] == nil
             disk_reads[disk.name] << [disk.timestamp * 1000, disk.read.to_i]
         end
@@ -136,7 +141,9 @@ class ComputersController < ApplicationController
 
     def get_disk_writes
         disk_writes = Hash.new
-        @current_computer.disks.select("timestamp, name, read, write").order(:timestamp, :name).each do |disk|
+        @current_computer.disks.select("timestamp, name, read, write")
+                .where("created_at >= ?", 1.week.ago.utc)
+                .order(:timestamp, :name).each do |disk|
             disk_writes[disk.name] = [] if disk_writes[disk.name] == nil
             disk_writes[disk.name] << [disk.timestamp * 1000, disk.write.to_i]
         end
@@ -155,7 +162,8 @@ class ComputersController < ApplicationController
 
     def get_interfaces_rx
         interfaces_rx = Hash.new
-        @current_computer.interfaces.order(:timestamp, :name).each do |interface|
+        @current_computer.interfaces.where("created_at >= ?", 1.week.ago.utc)
+                .order(:timestamp, :name).each do |interface|
             interfaces_rx[interface.name] = [] if interfaces_rx[interface.name] == nil
             interfaces_rx[interface.name] << [interface.timestamp * 1000, interface.rx.to_i * 8]
         end
@@ -174,7 +182,8 @@ class ComputersController < ApplicationController
 
     def get_interfaces_tx
         interfaces_tx = Hash.new
-        @current_computer.interfaces.order(:timestamp, :name).each do |interface|
+        @current_computer.interfaces.where("created_at >= ?", 1.week.ago.utc)
+                .order(:timestamp, :name).each do |interface|
             interfaces_tx[interface.name] = [] if interfaces_tx[interface.name] == nil
             interfaces_tx[interface.name] << [interface.timestamp * 1000, interface.tx.to_i * 8]
         end
@@ -236,6 +245,10 @@ class ComputersController < ApplicationController
         def get_computer
             @id = params['id']
             @current_computer = Computer.find_by_id(@id)
+            if @current_computer == nil
+                flash[:danger] = "Computer does not exist"
+                redirect_to action: "index" 
+            end
         end
 
     

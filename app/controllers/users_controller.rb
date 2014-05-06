@@ -15,6 +15,7 @@ class UsersController < ApplicationController
     def update
         @computers = Computer.all
         @new_user = User.find_by_id(params[:id])
+        Rails.logger.debug user_params
         if @new_user.update_attributes(user_params)
             flash[:success] = "User Updated"
             redirect_to edit_user_path @new_user

@@ -29,7 +29,7 @@
               <thead>
                 <th>Name:</th>
                 <th>CPU Usage:</th>
-                <th>Memory Usage:</th>
+                <th>Virtual Memory:</th>
                 <th>User</th>
               </thead>
               <tbody id="program_table">
@@ -37,7 +37,7 @@
                 <tr>
                   <td><small><%= program.name %></small></td>
                   <td><%= program.load_usage %></td>
-                  <td><%= program.memory_usage %></td>
+                  <td><%= display_memory program.memory_usage.to_i %></td>
                   <td><%= program.user %></td>
                 </tr>
               <% end %>
@@ -155,14 +155,6 @@ var buttons =  [{
                 count: 1,
                 text: '1d'
             }, {
-                type: 'week',
-                count: 1,
-                text: '1w'
-            }, {
-                type: 'month', 
-                count: 1,
-                text: '1M'
-            }, {
                 type: 'all',
                 text: 'ALL'
             }]; 
@@ -202,13 +194,26 @@ function net_io_formatter() {
     });
     return s;
 }
+
+function display_memory(mem) {
+    if (mem > 1024 * 1024) {
+        return (mem / 1024.0 / 1024.0).toFixed(2).toString() + "GB";
+    } else if (mem  > 1024) {
+        return (mem / 1024.0).toFixed(2).toString() + "MB";
+    } else if (mem == 0.0){
+        return "0KB";
+    } else {
+        return mem.toFixed(2).toString() + "KB";
+    }
+}
+
 function program_table(data) {
     $("#program_table").empty();
     $("#program_date").html(new Date(data['date'] * 1000.0).toString());
     data['programs'].forEach(function(program) {
         $('#program_table').append('<tr><td><small>' + program.name + 
             '</small></td><td>' + program.load_usage + '</td><td>' + 
-            program.memory_usage + '</td><td>' + 
+            display_memory(program.memory_usage) + '</td><td>' + 
             program.user + '</td></tr>');
     });
 }
@@ -280,7 +285,7 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             lineWidth: 2
         }, {
             title: {
-                text: 'Memory Usage'
+                text: 'Virtual Memory'
             },
             top: 300,
             height: 100,
@@ -305,7 +310,7 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             }    
         }, {
             type: 'areaspline',
-            name: 'Memory Usage',
+            name: 'Virtual Memory',
             data: data['mem'],
             yAxis: 1,
             point: {
