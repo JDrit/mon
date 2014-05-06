@@ -16,7 +16,7 @@ def get_memory_usage
     memory_usage = (File.read("/proc/meminfo").split(/\r?\n/)).map do |line| 
         (line.split(/\s+/))[1].to_i
     end
-    return memory_usage[0] - memory_usage[1] - memory_usage[2] - memory_usage[3]
+    return memory_usage[0] - memory_usage[1]
 end
 
 def get_partition_stats
@@ -33,7 +33,7 @@ end
 def get_mem_for_process pid
     begin
         File.readlines("/proc/#{pid}/status").each do |line|
-            return line.split(":")[1].to_i if line.match(/^VmSize/)
+            return line.split(":")[1].to_i if line.match(/^VmRSS/)
         end
         return 0
     rescue

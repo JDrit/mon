@@ -29,7 +29,7 @@
               <thead>
                 <th>Name:</th>
                 <th>CPU Usage:</th>
-                <th>Virtual Memory:</th>
+                <th>Real Memory:</th>
                 <th>User</th>
               </thead>
               <tbody id="program_table">
@@ -257,6 +257,8 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
     // create the chart
     $('#stats_chart').highcharts('StockChart', {
         chart: {
+            type: 'areaspline',
+            animation: Highcharts.svg,
             events: {
                 load: function() {
                     var cpu = this.series[0];
@@ -285,7 +287,7 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             lineWidth: 2
         }, {
             title: {
-                text: 'Virtual Memory'
+                text: 'Real Memory'
             },
             top: 300,
             height: 100,
@@ -293,7 +295,6 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
             lineWidth: 2
         }],
         series: [{
-            type: 'areaspline',
             name: 'Load Average',
             data: data['cpu'],
             point: {
@@ -309,8 +310,7 @@ $.getJSON('/load_data/stats/<%= @current_computer.id %>', function(data) {
                 valueDecimals: 2,
             }    
         }, {
-            type: 'areaspline',
-            name: 'Virtual Memory',
+            name: 'Real Memory',
             data: data['mem'],
             yAxis: 1,
             point: {
@@ -343,6 +343,8 @@ $.getJSON('/load_data/partitions/<%= @current_computer.id %>', function(data) {
     });
     $('#partitions').highcharts('StockChart', {
         chart: {
+            type: 'spline',
+            animation: Highcharts.svg,
             events: {
                 load: function() {
                     var series = this.series;
@@ -374,7 +376,6 @@ $.getJSON('/load_data/disk_reads/<%= @current_computer.id %>', function(data) {
     var series = [];
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
-            type: 'spline',
             data: data[key],
             point: {
                 events: {
@@ -390,6 +391,8 @@ $.getJSON('/load_data/disk_reads/<%= @current_computer.id %>', function(data) {
 
     $('#disk_reads').highcharts('StockChart', {
         chart: {
+            type: 'spline',
+            animation: Highcharts.svg,
             events: {
                 load: function() {
                     var series = this.series;
@@ -423,7 +426,6 @@ $.getJSON('/load_data/disk_writes/<%= @current_computer.id %>', function(data) {
     var series = [];
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
-            type: 'spline',
             data: data[key],
             point: {
                 events: {
@@ -440,6 +442,8 @@ $.getJSON('/load_data/disk_writes/<%= @current_computer.id %>', function(data) {
 
     $('#disk_writes').highcharts('StockChart', {
         chart: {
+            type: 'spline',
+            animation: Highcharts.svg,
             events: {
                 load: function() {
                     var series = this.series;
@@ -473,7 +477,6 @@ $.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>', function(data)
     var series = [];
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
-            type: 'spline',
             data: data[key],
             tooltip: {
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} kb/s</b><br/>',
@@ -484,6 +487,8 @@ $.getJSON('/load_data/interfaces_rx/<%= @current_computer.id %>', function(data)
 
     $('#interface_rx').highcharts('StockChart', {
         chart: {
+            type: 'spline',
+            animation: Highcharts.svg,
             events: {
                 load: function() {
                     var series = this.series;
@@ -517,7 +522,6 @@ $.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>', function(data)
     var series = [];
     Object.keys(data).forEach(function(key) {
         series.push({name: key, 
-            type: 'spline',
             data: data[key],
             tooltip: {
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} Kb/s</b><br/>',
@@ -527,6 +531,8 @@ $.getJSON('/load_data/interfaces_tx/<%= @current_computer.id %>', function(data)
     });
     $('#interface_tx').highcharts('StockChart', {
         chart: {
+            type: 'spline',
+            animation: Highcharts.svg,
             events: {
                 load: function() {
                     var series = this.series;

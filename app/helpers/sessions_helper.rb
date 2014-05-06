@@ -30,7 +30,6 @@ module SessionsHelper
     def signed_in_user
         unless signed_in?
             store_location
-            flash[:warning] = "Please sign in."
             redirect_to signin_url
         end
     end
