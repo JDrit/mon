@@ -16,7 +16,7 @@ def get_memory_usage
     memory_usage = (File.read("/proc/meminfo").split(/\r?\n/)).map do |line| 
         (line.split(/\s+/))[1].to_i
     end
-    return memory_usage[0] - memory_usage[1]
+    return memory_usage[0] - memory_usage[2]
 end
 
 def get_partition_stats
@@ -32,10 +32,11 @@ end
 
 def get_mem_for_process pid
     begin
+        sum = 0
         File.readlines("/proc/#{pid}/status").each do |line|
-            return line.split(":")[1].to_i if line.match(/^VmRSS/)
+            sum += line.split(":")[1].to_i if line.match(/^VmRSS/)
         end
-        return 0
+        return sum
     rescue
         return 0
     end
@@ -44,14 +45,14 @@ end
 
 def get_stats
     processes = Hash.new
-    stdin, stdout, stderr = Open3.popen3("ps aux --sort -%cpu")
+    stdin, stdout, stderr = Open3.popen3("ps aux")
     stdout.readlines.each do |line|
         line_split = line.split(/\s+/)
         next if line_split[0] == "USER"
         cmd = line_split[10..line_split.length].join(" ")
         cmd = cmd[1..-2] if cmd[0] == "[" && cmd[-1] == "]"
         processes[cmd.strip] = { load_usage: line_split[2], 
-                                 memory_usage: get_mem_for_process(line_split[1]), 
+                                 memory_usage: line_split[5].to_i, 
                                  user: line_split[0] }
     end
     return processes
@@ -61,7 +62,7 @@ def get_program_info
     programs = Hash.new
     Dir.entries("/proc").select {|f| !File.directory?(f) && f.match(/^(\d)+$/) }.each do |pid|
         begin
-            cmd_line = File.read("/proc/" + pid + "/cmdline").gsub("\u0000", " ")[0..-2]
+            cmd_line = File.read("/proc/" + pid + "/cmdline").gsub("\u0000", " ")
             cmd_line = File.read("/proc/" + pid + "/stat").split(" ")[1][1..-2] if cmd_line == ""
             lines = File.readlines("/proc/" + pid + "/io")
             programs[cmd_line.strip] = [lines[4].split(":")[1].to_i, lines[5].split(":")[1].to_i]

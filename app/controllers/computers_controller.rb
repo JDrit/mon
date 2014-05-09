@@ -41,7 +41,6 @@ class ComputersController < ApplicationController
     end
 
     def show
-        @computers = Computer.all
         if @current_computer.stats.length > 0
             date = @current_computer.stats.last.timestamp
             @programs = []

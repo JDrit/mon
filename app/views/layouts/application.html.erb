@@ -5,15 +5,21 @@
         <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
         <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
         <%= csrf_meta_tags %>
+
     </head>
     <body>
-        <%= render 'layouts/header' %>
-        <div class="container-fluid" style="margin-top: 50px">
-            <br />
-            <% flash.each do |key, value| %>
-                <div class="alert alert-<%= key %>"><%= value %></div>
-            <% end %>
-            <%= yield %>
+        <% if params[:controller] == "computers" && action_name == "show" %>
+        <div id="wrapper">
+        <% end %>
+            <%= render 'layouts/header' %>
+            <div id="page-wrapper">
+                <% flash.each do |key, value| %>
+                    <div class="alert alert-<%= key %>"><%= value %></div>
+                <% end %>
+                <%= yield %>
+            </div>
+        <% if params[:controller] == "computers" && action_name == "show" %>
         </div>
+        <% end %>
     </body>
 </html>

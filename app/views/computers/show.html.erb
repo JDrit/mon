@@ -1,18 +1,6 @@
 <% provide(:title, @current_computer.name) %>
 <% provide(:computer, @current_computer.name) %>
 
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-sm-3 col-md-1 sidebar">
-      <ul class="nav nav-sidebar" id="dataTabs">
-        <li class="active"><a href="#stats" data-toggle="tab">Load Usage</a></li>
-        <li><a href="#disk" data-toggle="tab">Disk Information</a></li>
-        <li><a href="#network" data-toggle="tab">Network Information</a></li>
-        <li><a href="#logs" data-toggle="tab">Logs</a></li>
-        <li><a href="#export" data-toggle="tab">Export</a></li>
-      </ul>
-   </div>
-   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-1 main">
      <h1 class="page-header">Dashboard</h1>
      <div class="tab-content">
        <div class="tab-pane fade in active" id="stats">
@@ -79,7 +67,7 @@
                  </table>
                </div>
              </div>
-           </div>
+         </div>
            <div class="tab-pane" id="disk_writes_tab">
              <div class="row">
                <div class="col-md-7">
@@ -128,9 +116,7 @@
        <div class="tab-pane fade" id="logs">Logs</div>
        <div class="tab-pane fade" id="export">Export</div>
      </div>
-   </div>
-  </div>
-</div>
+   
 <script>
     $(function () {
         $('#dataTabs a:first').tab('show')
@@ -200,10 +186,10 @@ function display_memory(mem) {
         return (mem / 1024.0 / 1024.0).toFixed(2).toString() + "GB";
     } else if (mem  > 1024) {
         return (mem / 1024.0).toFixed(2).toString() + "MB";
-    } else if (mem == 0.0){
+    } else if (mem == 0) {
         return "0KB";
     } else {
-        return mem.toFixed(2).toString() + "KB";
+        return Number(mem).toFixed(2).toString() + "KB";
     }
 }
 
