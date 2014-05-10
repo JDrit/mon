@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140216173351) do
+ActiveRecord::Schema.define(version: 20140509221021) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -100,5 +100,22 @@ ActiveRecord::Schema.define(version: 20140216173351) do
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["remember_token"], name: "index_users_on_remember_token", using: :btree
+
+  create_table "watchdogs", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "computer_id"
+    t.integer  "cpu_load"
+    t.decimal  "memory_usage"
+    t.integer  "disk_read"
+    t.integer  "disk_write"
+    t.integer  "rx"
+    t.integer  "tx"
+    t.integer  "disk_percentage_left"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "watchdogs", ["computer_id"], name: "index_watchdogs_on_computer_id", using: :btree
+  add_index "watchdogs", ["user_id"], name: "index_watchdogs_on_user_id", using: :btree
 
 end

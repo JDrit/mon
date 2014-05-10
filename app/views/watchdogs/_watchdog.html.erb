@@ -1,0 +1,28 @@
+For <b><%= watchdog.computer.name %></b>
+<p>Notifies when:</p>
+<ul>
+    <% if watchdog.cpu_load != nil %>
+        <li>cpu load reaches <%= watchdog.cpu_load %></li>
+    <% end %>
+    <% if watchdog.memory_usage != nil %>
+        <li>memory usage reaches <%= watchdog.memory_usage %></li>
+    <% end %>
+    <% if watchdog.disk_read != nil %>
+        <li>Disk reads reaches <%= watchdog.disk_read %></li>
+    <% end %>
+    <% if watchdog.disk_write != nil %>
+        <li>Disk writes reaches <%= watchdog.disk_writes %></li>
+    <% end %>
+    <% if watchdog.rx != nil %>
+        <li>Network incoming <%= watchdog.rx %></li>
+    <% end %>
+    <% if watchdog.tx != nil %>
+        <li>Network outgoing <% watchdog.tx %></li>
+    <% end %>
+    <% if watchdog.disk_percentage_left != nil %>
+        <li>Disk spaces reaches <% watchdog.disk_percentage_left %>%</li>
+    <% end %>
+</ul>
+<p>Last updated: <i><%= watchdog.updated_at %></i></p>
+
+

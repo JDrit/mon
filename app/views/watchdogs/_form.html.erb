@@ -1,0 +1,77 @@
+<%= form_for @watchdog do |f| %>
+    <% if @watchdog.errors[:cpu_load] != [] %>
+        <div class="form-group has-error">
+            <label class="control-label" for="inputError1">CPU Load - <%= @watchdog.errors[:cpu_load][0] %></label>
+            <%= f.text_field :cpu_load, placeholder: "CPU Load", class: "form-control" %>
+        </div>
+    <% else %>
+        <%= f.label :cpu_load %>
+        <%= f.text_field :cpu_load, class: "form-control", placeholder: "CPU Load" %>
+    <% end %>
+
+    <% if @watchdog.errors[:memory_usage] != [] %>
+        <div class="form-group has-error">
+            <label class="control-label" for="inputError1">Memory Usage - <%= @watchdog.errors[:memory_usage][0] %></label>
+            <%= f.text_field :memory_usage, placeholder: "Memory Usage", class: "form-control" %>
+        </div>
+    <% else %>
+        <%= f.label :memory_usage %>
+        <%= f.text_field :memory_usage, class: "form-control", placeholder: "Memory Usage" %>
+    <% end %>
+
+    <% if @watchdog.errors[:disk_read] != [] %>
+        <div class="form-group has-error">
+            <label class="control-label" for="inputError1">Disk Reads - <%= @watchdog.errors[:disk_read][0] %></label>
+            <%= f.text_field :disk_read, placeholder: "Disk Reads", class: "form-control" %>
+        </div>
+    <% else %>
+        <%= f.label :disk_read %>
+        <%= f.text_field :disk_read, class: "form-control", placeholder: "Disk Reads" %>
+    <% end %>
+
+    <% if @watchdog.errors[:disk_write] != [] %>
+        <div class="form-group has-error">
+            <label class="control-label" for="inputError1">Disk Writes - <%= @watchdog.errors[:disk_write][0] %></label>
+            <%= f.text_field :disk_write, placeholder: "Disk Writes", class: "form-control" %>
+        </div>
+    <% else %>
+        <%= f.label :disk_write %>
+        <%= f.text_field :disk_write, class: "form-control", placeholder: "Disk Writes" %>
+    <% end %>
+
+    <% if @watchdog.errors[:rx] != [] %>
+        <div class="form-group has-error">
+            <label class="control-label" for="inputError1">Network Incoming - <%= @watchdog.errors[:rx][0] %></label>
+            <%= f.text_field :rx, placeholder: "Network Incoming", class: "form-control" %>
+        </div>
+    <% else %>
+        <%= f.label :rx %>
+        <%= f.text_field :rx, class: "form-control", placeholder: "Network Incoming" %>
+    <% end %>
+
+    <% if @watchdog.errors[:tx] != [] %>
+        <div class="form-group has-error">
+            <label class="control-label" for="inputError1">Network Outgoing - <%= @watchdog.errors[:tx][0] %></label>
+            <%= f.text_field :tx, placeholder: "Network Outgoing", class: "form-control" %>
+        </div>
+    <% else %>
+        <%= f.label :tx %>
+        <%= f.text_field :tx, class: "form-control", placeholder: "Network Outgoing" %>
+    <% end %>
+
+    <% if @watchdog.errors[:disk_percentage_left] != [] %>
+        <div class="form-group has-error">
+            <label class="control-label" for="inputError1">Disk % Left - <%= @watchdog.errors[:disk_percentage_left][0] %></label>
+            <%= f.text_field :disk_percentage_left, placeholder: "Disk % Left", class: "form-control" %>
+        </div>
+    <% else %>
+        <%= f.label :disk_percentage_left %>
+        <%= f.text_field :disk_percentage_left, class: "form-control", placeholder: "Disk % Left" %>
+    <% end %>
+    <br> 
+    <%= f.select(:computer_id, options_for_select(Computer.all.collect { |c| [c.name, c.id] }), {}, {class: "form-control"}) %>
+
+    <br>
+    <%= f.submit  class: "btn btn-large btn-primary" %>
+<% end %>
+
