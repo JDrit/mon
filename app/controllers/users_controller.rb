@@ -1,6 +1,10 @@
 class UsersController < ApplicationController
     before_action :signed_in_user
 
+    def show
+
+    end
+
     def new
         @users = User.all
         @computers = Computer.all

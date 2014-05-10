@@ -1,0 +1,2 @@
+module WatchdogsHelper
+end

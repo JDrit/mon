@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_id: 
+  computer_id: 
+  cpu_load: 1
+  memory_usage: 9.99
+
+two:
+  user_id: 
+  computer_id: 
+  cpu_load: 1
+  memory_usage: 9.99

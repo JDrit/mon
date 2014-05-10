@@ -36,10 +36,29 @@
                         Computers <span class="glyphicon glyphicon-cog"></span>
                     <% end %>
                 </li>
-                <li>
-                    <%= link_to signout_path, method: "delete" do %>
-                        Logout <span class="glyphicon glyphicon-log-out"></span>
-                    <% end %>
+                <li class="dropdown user-dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="glyphicon glyphicon-user"></span><%= current_user.name %> <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <%= link_to user_path(@current_user.id) do %>
+                                <span class="glyphicon glyphicon-user"></span> Profile
+                            <% end %>
+                        </li>
+                        <li><a href="#"><span class="glyphicon glyphicon-envelope"></span>  Inbox <span class="badge">7</span></a></li>
+                        <li>
+                            <%= link_to watchdogs_path do %>
+                                <span class="glyphicon glyphicon-cog"></span> Watch dogs
+                            <% end %>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <%= link_to signout_path, method: "delete" do %>
+                                <span class="glyphicon glyphicon-log-out"></span> Log Out
+                            <% end %>
+                        </li>
+                    </ul>
                 </li>
             <% else %>
                 <li>
