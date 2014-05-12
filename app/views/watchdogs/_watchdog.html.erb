@@ -20,7 +20,7 @@ For <b><%= watchdog.computer.name %></b>
         <li>Network outgoing <% watchdog.tx %></li>
     <% end %>
     <% if watchdog.disk_percentage_left != nil %>
-        <li>Disk spaces reaches <% watchdog.disk_percentage_left %>%</li>
+        <li>Disk spaces reaches <%= watchdog.disk_percentage_left %>%</li>
     <% end %>
 </ul>
 <p>Last updated: <i><%= watchdog.updated_at %></i></p>

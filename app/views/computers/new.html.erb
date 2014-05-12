@@ -23,25 +23,9 @@
                         <%= link_to [:edit, computer] do %>
                             <button type="button" class="btn btn-primary">Edit</button>
                         <% end %>
-                        <button class="btn btn-danger" data-toggle="modal" data-target=".bs-example-modal-sm">Delete</button>
-                        <div class="modal fade bs-example-modal-sm" tabindex="-1" 
-                            role="dialog" aria-labelledby="mySmallModalLabel" 
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-sm">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                        <h4 class="modal-title" id="mySmallModalLabel">Delete?</h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        Are you sure you want to?
-                                        <%= link_to computer, method: :delete do %> 
-                                            <button type="button" class="btn btn-danger">Delete</button>
-                                        <% end %>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <%= link_to computer, method: :delete do %> 
+                            <button type="button" class="btn btn-danger">Delete</button>
+                        <% end %>
                     </td>
                 </tr>
             <% end %>

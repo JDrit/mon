@@ -54,6 +54,8 @@ class ApiController < ApplicationController
 
     private
     def validate_api_key
+        Rails.logger.info params
+        Rails.logger.info "test"
         @current_computer = Computer.find_by api_key: params[:api_key].to_s
         if @current_computer == nil
             render :json => { :error => "invalid api key" }

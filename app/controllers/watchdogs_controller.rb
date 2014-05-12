@@ -2,7 +2,7 @@ class WatchdogsController < ApplicationController
     before_action :signed_in_user
 
     def index
-        @watchdogs = Watchdog.where(user: @current_user) 
+        @watchdogs = @current_user.watchdogs
     end
 
     def new
@@ -16,32 +16,33 @@ class WatchdogsController < ApplicationController
         @watchdog.computer = Computer.find(computer_id)
         if @watchdog.save
             flash[:success] = "watchdog successfully created"
-            redirect_to @watchdog
+            redirect_to watchdogs_url
         else
             flash[:error] = "Could not create watchdog"
             render action: "new"
         end
     end
 
-    def delete
-        watchdog = Watchdog.where(id: params[:id], user: @current_user).first
+    def destroy
+        watchdog = @current_user.watchdogs.find(params[:id])
         if watchdog == nil
             flash[:error] = "watchdog does not exist"
         else
+            watchdog.destroy
             flash[:success] = "watchdog successfully deleted"
         end
         redirect_to watchdogs_url
     end
 
     def show
-        @watchdog = Watchdog.where(id: params[:id], user: @current_user).first
+        @watchdog = @current_user.watchdogs.find(params[:id])
         if @watchdog == nil
             flash[:error] = "watchdog does not exist"
         end
     end
 
     def edit
-        @watchdog = Watchdog.where(id: params[:id], user: @current_user).first
+        @watchdog = @current_user.watchdogs.find(params[:id])
         if @watchdog == nil
             flash[:error] = "watchdog does not exist"
             redirect_to watchdogs_url
@@ -49,7 +50,7 @@ class WatchdogsController < ApplicationController
     end
 
     def update
-        @watchdog = watchdog.where(id: params[:id], user: @current_user).first
+        @watchdog = @current_user.watchdogs.find(params[:id])
         if @watchdog == nil
             flash[:error] = "watchdog does not exist"
             redirect_to watchdogs_url
@@ -64,6 +65,6 @@ class WatchdogsController < ApplicationController
     private
         def watchdog_params
             params.require(:watchdog).permit(:cpu_load, :memory_usage, :disk_read,
-                                            :disk_write, :rx, :tx, :disk_percentage_left)
+                                             :disk_write, :rx, :tx, :disk_percentage_left)
         end
 end

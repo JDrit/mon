@@ -1,6 +1,6 @@
 class ComputersController < ApplicationController
     before_action :signed_in_user
-    before_action :get_computer, except: [:index, :create, :edit, :new]
+    before_action :get_computer, except: [:index, :create, :new]
 
     def new
         @computers = Computer.all
@@ -23,6 +23,7 @@ class ComputersController < ApplicationController
     end
 
     def destroy
+        Rails.logger.info "test"
         @current_computer.destroy
         flash[:success] = "Computer Deleted"
         redirect_to new_computer_path

@@ -13,6 +13,7 @@ class User < ActiveRecord::Base
         length: { minimum: 6, maximum: 250 },
         if: :password
 
+    has_many :watchdogs, dependent: :destroy
     def User.new_remember_token
         SecureRandom.urlsafe_base64
     end

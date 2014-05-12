@@ -9,6 +9,7 @@ class Computer < ActiveRecord::Base
     has_many :stats, dependent: :destroy
     has_many :programs, dependent: :destroy
     has_many :interfaces, dependent: :destroy
+    has_many :watchdogs, dependent: :destroy
 
     validates :name, presence: true, 
         uniqueness: { case_sensitive: false }, 
