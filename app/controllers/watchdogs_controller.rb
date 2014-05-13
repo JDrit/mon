@@ -18,7 +18,7 @@ class WatchdogsController < ApplicationController
             flash[:success] = "watchdog successfully created"
             redirect_to watchdogs_url
         else
-            flash[:error] = "Could not create watchdog"
+            flash[:danger] = "Could not create watchdog"
             render action: "new"
         end
     end
@@ -26,7 +26,7 @@ class WatchdogsController < ApplicationController
     def destroy
         watchdog = @current_user.watchdogs.find(params[:id])
         if watchdog == nil
-            flash[:error] = "watchdog does not exist"
+            flash[:danger] = "watchdog does not exist"
         else
             watchdog.destroy
             flash[:success] = "watchdog successfully deleted"
@@ -37,14 +37,14 @@ class WatchdogsController < ApplicationController
     def show
         @watchdog = @current_user.watchdogs.find(params[:id])
         if @watchdog == nil
-            flash[:error] = "watchdog does not exist"
+            flash[:danger] = "watchdog does not exist"
         end
     end
 
     def edit
         @watchdog = @current_user.watchdogs.find(params[:id])
         if @watchdog == nil
-            flash[:error] = "watchdog does not exist"
+            flash[:danger] = "watchdog does not exist"
             redirect_to watchdogs_url
         end
     end
@@ -52,12 +52,13 @@ class WatchdogsController < ApplicationController
     def update
         @watchdog = @current_user.watchdogs.find(params[:id])
         if @watchdog == nil
-            flash[:error] = "watchdog does not exist"
+            flash[:danger] = "watchdog does not exist"
             redirect_to watchdogs_url
         elsif @watchdog.update_attributes(watchdog_params)
-            redirect_to @watchdog
+            flash[:success] = "Watchdog successfully updated"
+            redirect_to watchdogs_url
         else
-            flash[:error] = "could not update watchdog"
+            flash[:danger] = "could not update watchdog"
             render action: "edit"
         end
     end

@@ -72,6 +72,6 @@
     <%= f.select(:computer_id, options_for_select(Computer.all.collect { |c| [c.name, c.id] }), {}, {class: "form-control"}) %>
 
     <br>
-    <%= f.submit  class: "btn btn-large btn-primary" %>
+    <%= f.submit  class: "btn btn-large btn-primary", method: method %>
 <% end %>
 
