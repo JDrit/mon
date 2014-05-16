@@ -47,37 +47,39 @@ class ApiController < ApplicationController
                     current_rx = interface_params[:rx]
                     current_tx = interface_params[:tx]
                 end
-                
+                notifications = [] 
+                Rails.logger.info ENV
                 @current_computer.watchdogs.each do |watchdog|
                     if watchdog.cpu_load != nil && 
                         stat.load_average >= watchdog.cpu_load
-                        notifications << "loa average hit #{stat.load_average}"
+                        notifications << "load average hit #{stat.load_average}"
                     end
                     if watchdog.memory_usage != nil &&
                         stat.memory_usage >= watchdog.memory_usage
-                        notifications << "memory usage hit #{format_memory stat.memory_usage}"
+                        notifications << "memory usage hit #{display_memory stat.memory_usage}"
                     end
                     if watchdog.disk_read != nil &&
                         current_read >= watchdog.disk_read
-                         
+                        notifications << "disk read hit #{display_speed current_read}"
                     end
                     if watchdog.disk_write && 
                         current_write >= watchdog.disk_write
-
+                        notifications << "disk writes hit #{display_speed current_writes}"
                     end
                     if watchdog.rx != nil && 
                         current_rx >= watchdog.rx
-
+                        notifications << "incoming traffic hit #{display_speed current_rx}"
                     end
                     if watchdog.tx != nil && 
                         current_tx >= watchdog.tx
+                        notifications << "outgoing traffic hit #{display_speed current_tx}"
 
                     end
                     if watchdog.disk_percentage_left != nil && 
                         (disk_usage.to_f / disk_cap.to_f) * 100 >= watchdog.disk_percentage_left
-
+                        notifications << "disk usage is now at #{((disk_usage.to_f / disk_cap.to_f) * 100).round(2)}%"
                     end
-
+                    WatchdogMailer.notification(watchdog, notifications).deliver if notifications.length != 0
 
                 end
                 
@@ -118,6 +120,18 @@ class ApiController < ApplicationController
             return (mem.to_f / 1024).round(2).to_s + "MB"
         else
             return mem.to_i.round(2).to_s + "KB"
+        end
+    end
+
+    def display_speed(bytes)
+        if bytes > 1024 * 1024 * 1024
+            return (bytes.to_f / 1024 / 1024 / 1024).round(2).to_s + "GB/s"
+        elsif bytes > 1024 * 1024
+            return (bytes.to_f / 1024 / 1024).round(2).to_s + "MB/s"
+        elsif bytes > 1024
+            return (bytes.to_f / 1024).round(2).to_s + "KB/s"
+        else
+            return bytes.to_s + "B/s"
         end
     end
 

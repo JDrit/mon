@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140509221021) do
+ActiveRecord::Schema.define(version: 20140516010348) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -104,8 +104,8 @@ ActiveRecord::Schema.define(version: 20140509221021) do
   create_table "watchdogs", force: true do |t|
     t.integer  "user_id"
     t.integer  "computer_id"
-    t.integer  "cpu_load"
-    t.decimal  "memory_usage"
+    t.decimal  "cpu_load"
+    t.integer  "memory_usage"
     t.integer  "disk_read"
     t.integer  "disk_write"
     t.integer  "rx"

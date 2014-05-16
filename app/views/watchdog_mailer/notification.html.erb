@@ -1,0 +1,11 @@
+<h2>Watchdog Alert</h2>
+
+Your watchdog for <b><%= @watchdog.computer.name %></b> was triggered due to:
+<ul>
+<% @notifications.each do |notification| %>
+    <li><%= notification %></li>
+<% end %>
+</ul>
+
+<p>This message was sent by your custom watchdog. If you do not want to 
+recieve this email, then remove your watchdog</p>
