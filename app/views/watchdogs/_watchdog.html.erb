@@ -5,13 +5,13 @@ For <b><%= watchdog.computer.name %></b>
         <li>cpu load reaches <%= watchdog.cpu_load %></li>
     <% end %>
     <% if watchdog.memory_usage != nil %>
-        <li>memory usage reaches <%= watchdog.memory_usage %></li>
+        <li>memory usage reaches <%= display_memory watchdog.memory_usage %></li>
     <% end %>
     <% if watchdog.disk_read != nil %>
-        <li>Disk reads reaches <%= watchdog.disk_read %></li>
+        <li>Disk reads reaches <%= display_disk watchdog.disk_read %></li>
     <% end %>
     <% if watchdog.disk_write != nil %>
-        <li>Disk writes reaches <%= watchdog.disk_writes %></li>
+        <li>Disk writes reaches <%= display_disk watchdog.disk_write %></li>
     <% end %>
     <% if watchdog.rx != nil %>
         <li>Network incoming <%= watchdog.rx %></li>

@@ -80,9 +80,7 @@ class ApiController < ApplicationController
                         notifications << "disk usage is now at #{((disk_usage.to_f / disk_cap.to_f) * 100).round(2)}%"
                     end
                     WatchdogMailer.notification(watchdog, notifications).deliver if notifications.length != 0
-
-                end
-                
+                end 
                 render :json => {:status => "success"} 
             rescue Exception => e
                 Rails.logger.info e

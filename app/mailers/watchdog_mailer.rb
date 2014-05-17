@@ -1,5 +1,5 @@
 class WatchdogMailer < ActionMailer::Base
-  default from: "from@example.com"
+  default from: "watchdog@jbox.batchik.net"
 
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
@@ -9,6 +9,7 @@ class WatchdogMailer < ActionMailer::Base
   def notification(watchdog, notifications)
     @notifications = notifications
     @watchdog = watchdog
+    
     mail to: watchdog.user.email,
         subject: "Mon notification",
         from: "watchdog@jbox.batchik.net"
