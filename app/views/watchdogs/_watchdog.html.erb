@@ -8,16 +8,16 @@ For <b><%= watchdog.computer.name %></b>
         <li>memory usage reaches <%= display_memory watchdog.memory_usage %></li>
     <% end %>
     <% if watchdog.disk_read != nil %>
-        <li>Disk reads reaches <%= display_disk watchdog.disk_read %></li>
+        <li>Disk reads reaches <%= display_disk_speed watchdog.disk_read %></li>
     <% end %>
     <% if watchdog.disk_write != nil %>
-        <li>Disk writes reaches <%= display_disk watchdog.disk_write %></li>
+        <li>Disk writes reaches <%= display_disk_speed watchdog.disk_write %></li>
     <% end %>
     <% if watchdog.rx != nil %>
-        <li>Network incoming <%= watchdog.rx %></li>
+        <li>Network incoming <%= display_network_speed watchdog.rx %></li>
     <% end %>
     <% if watchdog.tx != nil %>
-        <li>Network outgoing <% watchdog.tx %></li>
+        <li>Network outgoing <%= display_network_speed watchdog.tx %></li>
     <% end %>
     <% if watchdog.disk_percentage_left != nil %>
         <li>Disk spaces reaches <%= watchdog.disk_percentage_left %>%</li>

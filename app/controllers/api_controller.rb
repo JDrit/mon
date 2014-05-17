@@ -8,7 +8,7 @@ class ApiController < ApplicationController
             begin
                 @current_computer.uptime = params[:uptime]
                 @current_computer.save!
-                current_read = current_write = current_rx = current_rx = 0
+                current_read = current_write = current_tx = current_rx = 0
                 disk_usage = disk_cap = 0
                 stat = @current_computer.stats.create!(timestamp: date, 
                                                    load_average: params[:load_average],
@@ -48,7 +48,6 @@ class ApiController < ApplicationController
                     current_tx = interface_params[:tx]
                 end
                 notifications = [] 
-                Rails.logger.info ENV
                 @current_computer.watchdogs.each do |watchdog|
                     if watchdog.cpu_load != nil && 
                         stat.load_average >= watchdog.cpu_load
@@ -64,10 +63,10 @@ class ApiController < ApplicationController
                     end
                     if watchdog.disk_write && 
                         current_write >= watchdog.disk_write
-                        notifications << "disk writes hit #{display_speed current_writes}"
+                        notifications << "disk writes hit #{display_speed current_write}"
                     end
                     if watchdog.rx != nil && 
-                        current_rx >= watchdog.rx
+                        current_rx * 8 >= watchdog.rx
                         notifications << "incoming traffic hit #{display_speed current_rx}"
                     end
                     if watchdog.tx != nil && 
@@ -79,7 +78,8 @@ class ApiController < ApplicationController
                         (disk_usage.to_f / disk_cap.to_f) * 100 >= watchdog.disk_percentage_left
                         notifications << "disk usage is now at #{((disk_usage.to_f / disk_cap.to_f) * 100).round(2)}%"
                     end
-                    WatchdogMailer.notification(watchdog, notifications).deliver if notifications.length != 0
+                    # WatchdogMailer.notification(watchdog, notifications).deliver if notifications.length != 0
+                
                 end 
                 render :json => {:status => "success"} 
             rescue Exception => e
@@ -103,8 +103,6 @@ class ApiController < ApplicationController
 
     private
     def validate_api_key
-        Rails.logger.info params
-        Rails.logger.info "test"
         @current_computer = Computer.find_by api_key: params[:api_key].to_s
         if @current_computer == nil
             render :json => { :error => "invalid api key" }

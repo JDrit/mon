@@ -23,7 +23,6 @@ class ComputersController < ApplicationController
     end
 
     def destroy
-        Rails.logger.info "test"
         @current_computer.destroy
         flash[:success] = "Computer Deleted"
         redirect_to new_computer_path
