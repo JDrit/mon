@@ -4,6 +4,7 @@ require 'open3'
 require 'sys/filesystem'
 include Sys
 require 'net/http'
+require 'net/https'
 require 'uri'
 require 'json'
 
@@ -149,6 +150,10 @@ def background_thread url, api_key, interval
                      uptime: ticks }
             headers = { "Content-Type" => "application/json" }
             http = Net::HTTP.new(uri.host, uri.port)
+            if uri.scheme == "https"
+                http.use_ssl = true
+                http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            end
             request = Net::HTTP::Post.new(uri.request_uri, headers)
             request.body = data.to_json
             response = http.request request

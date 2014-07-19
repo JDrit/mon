@@ -12,8 +12,7 @@ class ApiController < ApplicationController
                 disk_usage = disk_cap = 0
                 stat = @current_computer.stats.create!(timestamp: date, 
                                                    load_average: params[:load_average],
-                                                   memory_usage: params[:memory_usage],
-                                                   network_up: 1, network_down: 1)
+                                                   memory_usage: params[:memory_usage])
                 params[:disks].each do |disk_params|
                     disk = @current_computer.disks.create!(timestamp: date, 
                                                        name: disk_params[:name], 
