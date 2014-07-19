@@ -8,6 +8,7 @@ gem 'highstock-rails'
 gem 'unicorn'
 gem 'pg'
 gem 'bcrypt-ruby', '~> 3.1.2'
+gem 'unicorn-worker-killer'
 
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
