@@ -79,30 +79,59 @@ class ComputersController < ApplicationController
     def get_stats
         cpu = []
         mem = []
-        @current_computer.stats.select("timestamp, load_average, memory_usage")
-                .where("created_at >= ?", 1.week.ago.utc)
+        last_timestamp = 1.week.ago
+        @current_computer.stats.select("timestamp, load_average, memory_usage, created_at")
+                .where("created_at >= ?", 1.week.ago)
                 .order(:timestamp).each do |stat|
+            # deals with empty values
+            while stat.created_at - last_timestamp > 5.minutes
+                last_timestamp += 5.minutes
+                cpu << [last_timestamp.to_i * 1000, nil]
+                mem << [last_timestamp.to_i * 1000, nil]
+            end
+            last_timestamp = stat.created_at
             cpu << [stat.timestamp * 1000, stat.load_average.to_f]
             mem << [stat.timestamp * 1000, stat.memory_usage.to_i / 1024]
+        end
+        while last_timestamp < 5.minutes.ago
+            last_timestamp += 5.minutes
+            cpu << [last_timestamp.to_i * 1000, nil]
+            mem << [last_timestamp.to_i * 1000, nil]
         end
         render :json => {cpu: cpu, mem: mem}
     end
 
     def get_stats_current
         stat = @current_computer.stats.last
-        render :json => { timestamp: stat.timestamp * 1000, 
-                          cpu: stat.load_average.to_f, 
-                          mem: stat.memory_usage.to_i / 1024 }
+        if stat.created_at < 5.minutes.ago
+            render :json => { timestamp: Time.now.to_i * 1000, 
+                              cpu: nil, 
+                              mem: nil }
+        else
+            render :json => { timestamp: stat.timestamp * 1000, 
+                              cpu: stat.load_average.to_f, 
+                              mem: stat.memory_usage.to_i / 1024 }
+        end
     end
 
     def get_partitions
         partitions = Hash.new
-        @current_computer.partitions.select("timestamp, name, usage")
-                .where("created_at >= ?", 1.week.ago.utc)
+        last_timestamp = 1.week.ago
+        @current_computer.partitions.select("timestamp, name, usage, created_at")
+                .where("created_at >= ?", 1.week.ago)
                 .order(:timestamp, :name).each do |partition|
+            while partition.created_at - last_timestamp > 5.minutes
+                last_timestamp += 5.minutes
+                partitions.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
+            end
+            last_timestamp = partition.created_at
             partitions[partition.name] = [] if partitions[partition.name] == nil
             partitions[partition.name] << [partition.timestamp * 1000, 
                                     partition.usage.to_f / 1024 / 1024]
+        end
+        while last_timestamp < 5.minutes.ago
+            last_timestamp += 5.minutes
+            partitions.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
         end
         render :json => partitions
     end
@@ -110,41 +139,61 @@ class ComputersController < ApplicationController
     def get_partitions_current
         timestamp = @current_computer.stats.last.timestamp
         data = Hash.new
-        data[:timestamp] = timestamp * 1000
+        data[:timestamp] = (timestamp < 5.minutes.ago) ? Time.now.to_i * 1000 : timestamp * 1000
         @current_computer.partitions.where(timestamp: timestamp).order(:name).each do |partition|
-            data[partition.name] = partition.usage.to_f / 1024 / 1024
+            data[partition.name] = (timestamp < 5.minutes.ago) ? nil : partition.usage.to_f / 1024 / 1024
         end
         render :json => data
     end
 
     def get_disk_reads
         disk_reads = Hash.new
-        @current_computer.disks.select("timestamp, name, read, write")
-                .where("created_at >= ?", 1.week.ago.utc)
+        last_timestamp = 1.week.ago
+        @current_computer.disks.select("timestamp, name, read, write, created_at")
+                .where("created_at >= ?", 1.week.ago)
                 .order(:timestamp, :name).each do |disk|
+            while disk.created_at - last_timestamp > 5.minutes
+                last_timestamp += 5.minutes
+                disk_reads.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
+            end
+            last_timestamp = disk.created_at 
             disk_reads[disk.name] = [] if disk_reads[disk.name] == nil
             disk_reads[disk.name] << [disk.timestamp * 1000, disk.read.to_i]
         end
+        while last_timestamp < 5.minutes.ago
+            last_timestamp += 5.minutes
+            disk_reads.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
+        end 
         render :json => disk_reads
     end
 
     def get_disk_reads_current
         timestamp = @current_computer.stats.last.timestamp
         data = Hash.new
-        data[:timestamp] = timestamp * 1000
+        data[:timestamp] = (timestamp < 5.minutes.ago) ? Time.now.to_i * 1000 : timestamp * 1000
         @current_computer.disks.where(timestamp: timestamp).order(:name).each do |disk|
-            data[disk.name] = disk.read.to_i
+            data[disk.name] = (timestamp < 5.minutes.ago) ? nil : disk.read.to_i
         end
         render :json => data
     end
 
     def get_disk_writes
         disk_writes = Hash.new
-        @current_computer.disks.select("timestamp, name, read, write")
-                .where("created_at >= ?", 1.week.ago.utc)
+        last_timestamp = 1.week.ago
+        @current_computer.disks.select("timestamp, name, read, write, created_at")
+                .where("created_at >= ?", 1.week.ago)
                 .order(:timestamp, :name).each do |disk|
+            while disk.created_at - last_timestamp > 5.minutes
+                last_timestamp += 5.minutes
+                disk_writes.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
+            end
+            last_timestamp = disk.created_at
             disk_writes[disk.name] = [] if disk_writes[disk.name] == nil
             disk_writes[disk.name] << [disk.timestamp * 1000, disk.write.to_i]
+        end
+        while last_timestamp < 5.minutes.ago
+            last_timestamp += 5.minutes
+            disk_writes.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
         end
         render :json => disk_writes
     end
@@ -152,7 +201,7 @@ class ComputersController < ApplicationController
     def get_disk_writes_current
         timestamp = @current_computer.stats.last.timestamp
         data = Hash.new
-        data[:timestamp] = timestamp * 1000
+        data[:timestamp] = (timestamp < 5.minutes.ago) ? Time.now.to_i * 1000 : timestamp * 1000
         @current_computer.disks.where(timestamp: timestamp).order(:name).each do |disk|
             data[disk.name] = disk.write.to_i
         end
@@ -161,10 +210,20 @@ class ComputersController < ApplicationController
 
     def get_interfaces_rx
         interfaces_rx = Hash.new
-        @current_computer.interfaces.where("created_at >= ?", 1.week.ago.utc)
+        last_timestamp = 1.week.ago
+        @current_computer.interfaces.where("created_at >= ?", 1.week.ago)
                 .order(:timestamp, :name).each do |interface|
+            while interface.created_at - last_timestamp > 5.minutes
+                last_timestamp += 5.minutes
+                interfaces_rx.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
+            end 
+            last_timestamp = interface.created_at
             interfaces_rx[interface.name] = [] if interfaces_rx[interface.name] == nil
             interfaces_rx[interface.name] << [interface.timestamp * 1000, interface.rx.to_i * 8]
+        end
+        while last_timestamp < 5.minutes.ago
+            last_timestamp += 5.minutes
+            interfaces_rx.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
         end
         render :json => interfaces_rx
     end
@@ -172,19 +231,29 @@ class ComputersController < ApplicationController
     def get_interfaces_rx_current
         timestamp = @current_computer.stats.last.timestamp
         data = Hash.new
-        data[:timestamp] = timestamp * 1000
+        data[:timestamp] = (timestamp < 5.minutes.ago) ? Time.now.to_i * 1000 : timestamp * 1000
         @current_computer.interfaces.where(timestamp: timestamp).order(:name).each do |interface|
-            data[interface.name] = interface.rx.to_i * 8
+            data[interface.name] = (timestamp < 5.minutes.ago) ? nil : interface.rx.to_i * 8
         end
         render :json => data
     end
 
     def get_interfaces_tx
         interfaces_tx = Hash.new
-        @current_computer.interfaces.where("created_at >= ?", 1.week.ago.utc)
+        last_timestamp = 1.week.ago
+        @current_computer.interfaces.where("created_at >= ?", 1.week.ago)
                 .order(:timestamp, :name).each do |interface|
+            while interface.created_at - last_timestamp > 5.minutes
+                last_timestamp += 5.minutes
+                interfaces_tx.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
+            end
+            last_timestamp = interface.created_at
             interfaces_tx[interface.name] = [] if interfaces_tx[interface.name] == nil
             interfaces_tx[interface.name] << [interface.timestamp * 1000, interface.tx.to_i * 8]
+        end
+        while last_timestamp < 5.minutes.ago
+            last_timestamp += 5.minutes
+            interfaces_tx.each { |name, data| data << [last_timestamp.to_i * 1000, nil] }
         end
         render :json => interfaces_tx
     end
@@ -192,9 +261,9 @@ class ComputersController < ApplicationController
     def get_interfaces_tx_current
         timestamp = @current_computer.stats.last.timestamp
         data = Hash.new
-        data[:timestamp] = timestamp * 1000
+        data[:timestamp] = (timestamp < 5.minutes.ago) ? Time.now.to_i * 1000 : timestamp * 1000
         @current_computer.interfaces.where(timestamp: timestamp).order(:name).each do |interface|
-            data[interface.name] = interface.tx.to_i * 8
+            data[interface.name] = (timestamp < 5.minutes.ago) ? nil : interface.tx.to_i * 8
         end
         render :json => data
     end
@@ -249,6 +318,4 @@ class ComputersController < ApplicationController
                 redirect_to action: "index" 
             end
         end
-
-    
 end
