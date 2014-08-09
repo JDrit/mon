@@ -1,27 +1,26 @@
-<%= form_for computer do |f| %>
-    <% if computer.errors[:name] != [] %>
-        <div class="form-group has-error">
-            <label class="control-label" for="inputError1">Name - <%= computer.errors[:name][0] %></label>
-            <%= f.text_field :name, class: "form-control" %>
-        </div>
-    <% else %>
-            <%= f.label :name %>
-            <%= f.text_field :name, class: "form-control" %>
+<div class="container well" style="max-width: 900px">
+    <%= form_for computer do |f| %>
+        <% if computer.errors[:name] != [] %>
+            <div class="form-group has-error">
+                <label class="control-label" for="inputError1">Name - <%= computer.errors[:name][0] %></label>
+                <%= f.text_field :name, class: "form-control" %>
+            </div>
+        <% else %>
+                <%= f.label :name %>
+                <%= f.text_field :name, class: "form-control" %>
+        <% end %>
+
+        <% if computer.errors[:api_key] != [] %>
+            <div class="form-group has-error">
+                <label class="control-label" for="inputError1">Api key - <%= computer.errors[:api_key][0] %></label>
+                <%= f.text_field :api_key, class: "form-control" %>
+            </div>
+        <% else %>
+                <%= f.label :api_key %>
+                <%= f.text_field :api_key, class: "form-control" %>
+        <% end %>
+        <br />
+        <%= f.submit class: "btn btn-large btn-primary", method: method %>
+        <%= f.button "Generate key", class: "btn btn-large", id: "generate_api_button", type: "button" %> 
     <% end %>
-
-    <% if computer.errors[:api_key] != [] %>
-        <div class="form-group has-error">
-            <label class="control-label" for="inputError1">Api key - <%= computer.errors[:api_key][0] %></label>
-            <%= f.text_field :api_key, class: "form-control" %>
-        </div>
-    <% else %>
-            <%= f.label :api_key %>
-            <%= f.text_field :api_key, class: "form-control" %>
-    <% end %>
-
-
-
-    <br />
-    <%= f.submit  class: "btn btn-large btn-primary", method: method %>
-<% end %>
-
+</div>

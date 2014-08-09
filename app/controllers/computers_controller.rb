@@ -1,6 +1,7 @@
 class ComputersController < ApplicationController
     before_action :signed_in_user
     before_action :get_computer, except: [:index, :create, :new]
+    @@time_range = 1.week.ago
 
     def new
         @computers = Computer.all
@@ -79,9 +80,9 @@ class ComputersController < ApplicationController
     def get_stats
         cpu = []
         mem = []
-        last_timestamp = 1.week.ago
+        last_timestamp = @@time_range
         @current_computer.stats.select("timestamp, load_average, memory_usage, created_at")
-                .where("created_at >= ?", 1.week.ago)
+                .where("created_at >= ?", @@time_range)
                 .order(:timestamp).each do |stat|
             # deals with empty values
             while stat.created_at - last_timestamp > 5.minutes
@@ -116,9 +117,9 @@ class ComputersController < ApplicationController
 
     def get_partitions
         partitions = Hash.new
-        last_timestamp = 1.week.ago
+        last_timestamp = @@time_range
         @current_computer.partitions.select("timestamp, name, usage, created_at")
-                .where("created_at >= ?", 1.week.ago)
+                .where("created_at >= ?", @@time_range)
                 .order(:timestamp, :name).each do |partition|
             while partition.created_at - last_timestamp > 5.minutes
                 last_timestamp += 5.minutes
@@ -148,9 +149,9 @@ class ComputersController < ApplicationController
 
     def get_disk_reads
         disk_reads = Hash.new
-        last_timestamp = 1.week.ago
+        last_timestamp = @@time_range
         @current_computer.disks.select("timestamp, name, read, write, created_at")
-                .where("created_at >= ?", 1.week.ago)
+                .where("created_at >= ?", @@time_range)
                 .order(:timestamp, :name).each do |disk|
             while disk.created_at - last_timestamp > 5.minutes
                 last_timestamp += 5.minutes
@@ -179,9 +180,9 @@ class ComputersController < ApplicationController
 
     def get_disk_writes
         disk_writes = Hash.new
-        last_timestamp = 1.week.ago
+        last_timestamp = @@time_range
         @current_computer.disks.select("timestamp, name, read, write, created_at")
-                .where("created_at >= ?", 1.week.ago)
+                .where("created_at >= ?", @@time_range)
                 .order(:timestamp, :name).each do |disk|
             while disk.created_at - last_timestamp > 5.minutes
                 last_timestamp += 5.minutes
@@ -210,8 +211,8 @@ class ComputersController < ApplicationController
 
     def get_interfaces_rx
         interfaces_rx = Hash.new
-        last_timestamp = 1.week.ago
-        @current_computer.interfaces.where("created_at >= ?", 1.week.ago)
+        last_timestamp = @@time_range
+        @current_computer.interfaces.where("created_at >= ?", @@time_range)
                 .order(:timestamp, :name).each do |interface|
             while interface.created_at - last_timestamp > 5.minutes
                 last_timestamp += 5.minutes
@@ -240,8 +241,8 @@ class ComputersController < ApplicationController
 
     def get_interfaces_tx
         interfaces_tx = Hash.new
-        last_timestamp = 1.week.ago
-        @current_computer.interfaces.where("created_at >= ?", 1.week.ago)
+        last_timestamp = @@time_range
+        @current_computer.interfaces.where("created_at >= ?", @@time_range)
                 .order(:timestamp, :name).each do |interface|
             while interface.created_at - last_timestamp > 5.minutes
                 last_timestamp += 5.minutes
