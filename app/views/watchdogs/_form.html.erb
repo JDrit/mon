@@ -12,51 +12,61 @@
     <% if @watchdog.errors[:memory_usage] != [] %>
         <div class="form-group has-error">
             <label class="control-label" for="inputError1">Memory Usage - <%= @watchdog.errors[:memory_usage][0] %> (MB)</label>
-            <%= f.text_field :memory_usage, placeholder: "Memory Usage", class: "form-control" %>
+            <%= f.text_field :memory_usage, placeholder: "Memory Usage", class: "form-control",
+                value: display_memory(@watchdog.memory_usage) %>
         </div>
     <% else %>
         <%= f.label :memory_usage %> (KB)
-        <%= f.text_field :memory_usage, class: "form-control", placeholder: "Memory Usage" %>
+        <%= f.text_field :memory_usage, class: "form-control", placeholder: "Memory Usage", 
+            value: display_memory(@watchdog.memory_usage) %>
     <% end %>
 
     <% if @watchdog.errors[:disk_read] != [] %>
         <div class="form-group has-error">
             <label class="control-label" for="inputError1">Disk Reads - <%= @watchdog.errors[:disk_read][0] %> (Bytes/s)</label>
-            <%= f.text_field :disk_read, placeholder: "Disk Reads", class: "form-control" %>
+            <%= f.text_field :disk_read, placeholder: "Disk Reads", class: "form-control", 
+                value: display_disk_speed(@watchdog.disk_read) %>
         </div>
     <% else %>
         <%= f.label :disk_read %> (Bytes/s)
-        <%= f.text_field :disk_read, class: "form-control", placeholder: "Disk Reads" %>
+        <%= f.text_field :disk_read, class: "form-control", placeholder: "Disk Reads", 
+            value: display_disk_speed(@watchdog.disk_read) %>
     <% end %>
 
     <% if @watchdog.errors[:disk_write] != [] %>
         <div class="form-group has-error">
             <label class="control-label" for="inputError1">Disk Writes - <%= @watchdog.errors[:disk_write][0] %> (Bytes/s)</label>
-            <%= f.text_field :disk_write, placeholder: "Disk Writes", class: "form-control" %>
+            <%= f.text_field :disk_write, placeholder: "Disk Writes", class: "form-control",
+                value: display_disk_speed(@watchdog.disk_write) %>
         </div>
     <% else %>
         <%= f.label :disk_write %> (Bytes/s)
-        <%= f.text_field :disk_write, class: "form-control", placeholder: "Disk Writes" %>
+        <%= f.text_field :disk_write, class: "form-control", placeholder: "Disk Writes", 
+            value: display_disk_speed(@watchdog.disk_write) %>
     <% end %>
 
     <% if @watchdog.errors[:rx] != [] %>
         <div class="form-group has-error">
             <label class="control-label" for="inputError1">Network Incoming - <%= @watchdog.errors[:rx][0] %> (b/s)</label>
-            <%= f.text_field :rx, placeholder: "Network Incoming", class: "form-control" %>
+            <%= f.text_field :rx, placeholder: "Network Incoming", class: "form-control", 
+                value: display_network_speed(@watchdog.rx) %>
         </div>
     <% else %>
         <%= f.label :rx %> (b/s)
-        <%= f.text_field :rx, class: "form-control", placeholder: "Network Incoming" %>
+        <%= f.text_field :rx, class: "form-control", placeholder: "Network Incoming",
+            value: display_network_speed(@watchdog.rx) %>
     <% end %>
 
     <% if @watchdog.errors[:tx] != [] %>
         <div class="form-group has-error">
             <label class="control-label" for="inputError1">Network Outgoing - <%= @watchdog.errors[:tx][0] %> (b/s)</label>
-            <%= f.text_field :tx, placeholder: "Network Outgoing", class: "form-control" %>
+            <%= f.text_field :tx, placeholder: "Network Outgoing", class: "form-control", 
+                value: display_network_speed(@watchdog.tx) %>
         </div>
     <% else %>
         <%= f.label :tx %> (b/s)
-        <%= f.text_field :tx, class: "form-control", placeholder: "Network Outgoing" %>
+        <%= f.text_field :tx, class: "form-control", placeholder: "Network Outgoing", 
+            value: display_network_speed(@watchdog.tx) %>
     <% end %>
 
     <% if @watchdog.errors[:disk_percentage_left] != [] %>
@@ -69,8 +79,8 @@
         <%= f.text_field :disk_percentage_left, class: "form-control", placeholder: "Disk % Left" %>
     <% end %>
     <br> 
-    <%= f.select(:computer_id, options_for_select(Computer.all.collect { |c| [c.name, c.id] }), {}, {class: "form-control"}) %>
-
+    <%= f.select(:computer_id, options_for_select(Computer.all.collect { |c| [c.name, c.id] }, @watchdog.computer.id), 
+                 {}, {class: "form-control"}) %>
     <br>
     <%= f.submit  class: "btn btn-large btn-primary", method: method %>
 <% end %>

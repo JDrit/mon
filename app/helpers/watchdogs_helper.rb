@@ -1,6 +1,8 @@
 module WatchdogsHelper
     def display_memory(mem)
-        if mem.to_i > 1024 * 1024
+        if mem == nil
+            return ""
+        elsif mem.to_i > 1024 * 1024
             return (mem.to_f / 1024 / 1024).round(2).to_s + "GB"
         elsif mem.to_i > 1024
             return (mem.to_f / 1024).round(2).to_s + "MB"
@@ -10,7 +12,9 @@ module WatchdogsHelper
     end
 
     def display_network_speed(bits)
-        if bits.to_i > 1024 * 1024 * 1024 * 1024
+        if bits == nil
+            return ""
+        elsif bits.to_i > 1024 * 1024 * 1024 * 1024
             return (bits.to_f / 1024 / 1024 / 1024 / 1024).round(2).to_s + "Tb/s"
         elsif bits.to_i > 1024 * 1024 * 1024
             return (bits.to_f / 1024 / 1024 / 1024).round(2).to_s + "Gb/s"
@@ -23,9 +27,10 @@ module WatchdogsHelper
         end
     end
 
-
     def display_disk_speed(bytes)
-        if bytes.to_i > 1024 * 1024 * 1024 * 1024
+        if bytes == nil
+            return ""
+        elsif bytes.to_i > 1024 * 1024 * 1024 * 1024
             return (bytes.to_f / 1024 / 1024 / 1024 / 1024).round(2).to_s + "TB/s"
         elsif bytes.to_i > 1024 * 1024 * 1024
             return (bytes.to_f / 1024 / 1024 / 1024).round(2).to_s + "GB/s"
